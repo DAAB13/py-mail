@@ -1,0 +1,38 @@
+<!-- templates/inicio_docentes.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Hola, {{ nombre_docente }}</h2>
+    <p>Te enviamos la programación para el curso <strong>{{ curso }}</strong> (NRC: {{ nrc }}).</p>
+    
+    <p>Tus sesiones programadas son:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Sesión</th>
+                <th>Fecha</th>
+                <th>Horario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sesiones %}
+            <tr>
+                <td>{{ s.sesion }}</td>
+                <td>{{ s.fechas }}</td>
+                <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>¡Buen inicio de clases!</p>
+</body>
+</html>

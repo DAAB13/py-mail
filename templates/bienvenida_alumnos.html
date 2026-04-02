@@ -1,0 +1,53 @@
+<!-- templates/bienvenida_alumnos.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { background-color: #003594; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; border: 1px solid #ddd; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.9em; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        .footer { color: #888; font-size: 0.8em; margin-top: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¡Bienvenido a tu curso!</h1>
+        </div>
+        <div class="content">
+            <p>Hola,</p>
+            <p>Te damos la bienvenida al curso <strong>{{ curso }}</strong> (NRC: {{ nrc }}).</p>
+            <p>A continuación, te detallamos la programación de todas tus sesiones para que las tengas presentes:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sesión</th>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sesiones %}
+                    <tr>
+                        <td>{{ s.sesion }}</td>
+                        <td>{{ s.fechas }}</td>
+                        <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <p><strong>Docente principal:</strong> {{ docente }}</p>
+            <p>¡Muchos éxitos en este inicio de clases!</p>
+        </div>
+        <div class="footer">
+            Este es un correo informativo generado por el Asistente Académico.
+        </div>
+    </div>
+</body>
+</html>
