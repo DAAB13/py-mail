@@ -53,3 +53,30 @@ class SesionProgramada:
     def get_resumen(self) -> str:
         """Un pequeño resumen para usar en correos o logs."""
         return f"{self.curso} (NRC: {self.nrc}) - {self.fechas} {self.hora_inicio}-{self.hora_fin}"
+
+    @property
+    def fecha_formateada(self) -> str:
+        """Devuelve la fecha en formato DD/MM/AAAA si está en formato YYYY-MM-DD."""
+        f_raw = str(self.fechas)
+        if "-" in f_raw and len(f_raw) >= 10:
+            parts = f_raw.split("-")
+            if len(parts[0]) == 4:
+                return f"{parts[2][:2]}/{parts[1]}/{parts[0]}"
+        return f_raw
+
+    @property
+    def dict_plantilla(self) -> dict:
+        """Devuelve un diccionario listo para ser consumido por las plantillas Jinja2."""
+        return {
+            'sesion': self.sesion,
+            'fecha': self.fecha_formateada,
+            'fecha_iso': str(self.fechas),  # Útil para ordenamiento
+            'hora_inicio': str(self.hora_inicio)[:5],
+            'hora_fin': str(self.hora_fin)[:5],
+            'tipo': self.soporte or "Clase",
+            'periodo': self.periodo,
+            'nrc': self.nrc,
+            'curso': self.curso,
+            'estado': str(self.estado_clase).upper(),
+            'docente': self.docente
+        }

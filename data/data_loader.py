@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 from typing import List
+from functools import lru_cache
 import pandas as pd
 from dotenv import load_dotenv
 from loguru import logger
@@ -37,6 +38,7 @@ def _load_df_from_parquet(var_name: str, description: str) -> pd.DataFrame:
         logger.error(f"Error al leer parquet de {description}: {e}")
         raise
 
+@lru_cache(maxsize=1)
 def load_programacion() -> List[SesionProgramada]:
     """Carga y devuelve la lista de sesiones programadas."""
     df = _load_df_from_parquet("PATH_PROGRAMACION", "programación")
@@ -46,6 +48,7 @@ def load_programacion() -> List[SesionProgramada]:
     logger.success(f"Cargadas {len(sesiones)} sesiones de programación.")
     return sesiones
 
+@lru_cache(maxsize=1)
 def load_estudiantes() -> List[Estudiante]:
     """Carga y devuelve la lista de estudiantes."""
     df = _load_df_from_parquet("PATH_ESTUDIANTES", "estudiantes")
@@ -53,6 +56,7 @@ def load_estudiantes() -> List[Estudiante]:
     logger.success(f"Cargados {len(estudiantes)} estudiantes.")
     return estudiantes
 
+@lru_cache(maxsize=1)
 def load_docentes() -> List[Docente]:
     """Carga y devuelve la lista de docentes."""
     df = _load_df_from_parquet("PATH_DOCENTES", "docentes")
