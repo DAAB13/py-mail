@@ -127,6 +127,22 @@
       margin-bottom: 25px;
       border-radius: 0 4px 4px 0;
     }
+    .tech-reqs {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      border-left: 5px solid #fca311;
+      padding: 20px;
+      margin: 25px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.9em;
+    }
+    .tech-reqs ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+    .tech-reqs li {
+      margin-bottom: 5px;
+    }
     .divider {
       border: none;
       border-top: 1px solid #e7e7e7;
@@ -175,7 +191,7 @@
                 <table class="sessions-table">
                   <thead>
                     <tr>
-                      <th># Sesión</th>
+                      <th>Sesión</th>
                       <th>Fecha</th>
                       <th>Horario (Inicio - Fin)</th>
                     </tr>
@@ -192,13 +208,13 @@
                 </table>
               </div>
 
-              <p style="text-align: center;">🔗 <strong>Clases en vivo:</strong><br>
+              <p style="text-align: center;">💻 <strong>Clases en vivo:</strong><br>
               El acceso será a través del Aula Virtual UPN:</p>
               
               <table border="0" cellspacing="0" cellpadding="0" role="presentation" align="center" style="margin: 20px auto;">
                 <tr>
                   <td align="center">
-                    <a href="{{ url_mimundo }}" class="btn">👉 Acceder a Mi Mundo UPN</a>
+                    <a href="{{ url_mimundo }}" class="btn">🚀 Acceder a Mi Mundo UPN</a>
                   </td>
                 </tr>
               </table>
@@ -234,6 +250,22 @@
                 <li>Descargue materiales y grabaciones (disponibles hasta 7 días tras el fin del curso).</li>
                 <li>Tutoriales Blackboard Ultra: <a href="{{ url_tutoriales_alumnos }}">Ver Recursos</a></li>
               </ul>
+
+              <div class="tech-reqs">
+                <p style="margin-top: 0; font-weight: bold; color: #fca311;">CONSIDERACIONES TÉCNICAS</p>
+                <p style="margin-bottom: 8px;">Para una mejor experiencia, se recomienda usar un cable de red y evitar dispositivos móviles.</p>
+                <ul style="list-style-type: '▸';">
+                  <li><strong>Requerimientos Mínimos:</strong>
+                    <ul style="list-style-type: circle; padding-left: 20px; margin-top: 5px;">
+                      <li>Sistema operativo Windows 7+ o Mac OS X 10.12+</li>
+                      <li>RAM: 4GB (8GB recomendado)</li>
+                      <li>Disco: 20GB de espacio disponible</li>
+                      <li>Ancho de banda: 2 Mbps (descarga) / 750 Kbps (subida)</li>
+                      <li>Navegador: Google Chrome o Mozilla Firefox</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
 
               <hr class="divider">
 

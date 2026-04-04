@@ -15,13 +15,21 @@ base_dir = "templates"
 [templates.bienvenida_alumnos]
 subject = "Bienvenida al curso: {curso} - {id}"
 # Nombres de archivos que deben estar en PATH_ADJUNTOS_ALUMNOS
-attachments = ["Cambio de contraseña - Estudiante.pdf", "Configuración_de_Microsoft_Authenticator_Estudiante.pdf"]
+attachments = [
+  "Cambio de contraseña - Estudiante.pdf", "Configuración_de_Microsoft_Authenticator_Estudiante.pdf",
+  "GUIA CONTACTO UPN.pdf", "MANUAL PARA CONSULTAS A CONTACTO UPN.pdf",
+  "Reglamento de estudios de la escuela de posgrado y estudios continuos.pdf"
+]
 attachments_path = "PATH_ADJUNTOS_ALUMNOS"
 type = "student_welcome"
 
 [templates.inicio_docentes]
 subject = "Inicio de curso: {fecha_inicio} - {curso} - {id}"
-attachments = ["FONT PRINCIPAL SHARP GROTESK BOOK_SEMIBOLD_ BOLD.zip", "Manual Portal Académico.pdf"]
+attachments = [
+  "FONT PRINCIPAL SHARP GROTESK BOOK_SEMIBOLD_ BOLD.zip", "Manual Portal Académico.pdf",
+  "acceder a videconferencias - class for teams.png", "IMAGEN ESTRUCTURA.png",
+  "UPN PPT Patron ppt.pptx", "Presentación DOCENTE EPEC.pptx"
+]
 attachments_path = "PATH_ADJUNTOS_DOCENTES"
 type = "teacher_start"
 
