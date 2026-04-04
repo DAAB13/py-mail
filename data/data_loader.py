@@ -34,8 +34,8 @@ def _load_df_from_parquet(var_name: str, description: str) -> pd.DataFrame:
         # Aseguramos que los nombres de las columnas no tengan espacios raros
         df.columns = [col.strip() for col in df.columns]
         return df
-    except Exception as e:
-        logger.error(f"Error al leer parquet de {description}: {e}")
+    except Exception:
+        logger.exception(f"Error crítico al leer parquet de {description}")
         raise
 
 @lru_cache(maxsize=1)

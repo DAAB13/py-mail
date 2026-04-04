@@ -5,19 +5,27 @@ from pathlib import Path
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledText
+from PIL import Image, ImageTk
 
 # Añadimos el directorio raíz al path para que encuentre los módulos del proyecto
 # Esto es clave para que la app funcione al ejecutarla directamente
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from services.mailing import MailingService
+from config.logging_config import setup_logging
 
 class PyMailApp(ttk.Window):
     def __init__(self):
         # Configuración inicial de la ventana con el tema 'litera'
-        super().__init__(title="Py-Mail | Asistente Académico UPN", themename="litera")
+        super().__init__(title="Py Mail", themename="darkly")
+        setup_logging()
         self.geometry("800x600")
         self.resizable(False, False)
+
+        # --- Animación del GIF ---
+        self.gif_frames = []
+        self.gif_delay = 100  # Delay por defecto
+        self.load_gif()
 
         try:
             # Inicializamos el servicio de mailing, el corazón de la aplicación
@@ -34,14 +42,50 @@ class PyMailApp(ttk.Window):
         error_label = ttk.Label(self, text=message, bootstyle="danger", wraplength=750)
         error_label.pack(pady=20, padx=20)
 
+    def load_gif(self):
+        """Carga los frames de la animación GIF."""
+        try:
+            gif_path = Path(__file__).resolve().parent.parent / "assets/megaman.gif"
+            with Image.open(gif_path) as img:
+                self.gif_delay = img.info.get('duration', 100)
+                for i in range(img.n_frames):
+                    img.seek(i)
+                    # Creamos una copia para cada frame
+                    frame_image = img.copy()
+                    # Guardamos el PhotoImage para que no lo borre el recolector de basura
+                    self.gif_frames.append(ImageTk.PhotoImage(frame_image))
+        except FileNotFoundError:
+            self.gif_frames = []
+        except Exception:
+            self.gif_frames = [] # Si hay cualquier error, no mostramos animación
+
+    def update_gif_frame(self, frame_num):
+        """Actualiza el frame del GIF que se muestra en el Label."""
+        if not self.gif_frames:
+            return
+
+        frame = self.gif_frames[frame_num]
+        self.gif_label.configure(image=frame)
+
+        next_frame_num = (frame_num + 1) % len(self.gif_frames)
+        self.after(self.gif_delay, self.update_gif_frame, next_frame_num)
+
     def create_widgets(self):
         """Crea y organiza los widgets de la interfaz."""
         main_frame = ttk.Frame(self, padding=20)
         main_frame.pack(fill=BOTH, expand=YES)
 
-        # Título principal
-        header = ttk.Label(main_frame, text="Asistente de Gestión Académica", font=("Helvetica", 18, "bold"), bootstyle=PRIMARY)
-        header.pack(pady=(0, 20))
+        # --- Cabecera con Título y GIF ---
+        header_frame = ttk.Frame(main_frame)
+        header_frame.pack(fill=X, pady=(0, 20))
+
+        header = ttk.Label(header_frame, text="Py Mail", font=("Helvetica", 18, "bold"), bootstyle=SUCCESS)
+        header.pack(side=LEFT, anchor=W)
+
+        if self.gif_frames:
+            self.gif_label = ttk.Label(header_frame)
+            self.gif_label.pack(side=RIGHT, anchor=E, padx=(0, 10))
+            self.after(0, self.update_gif_frame, 0) # Inicia la animación
 
         # --- Flujos ---
         self.create_flow1_widgets(main_frame)
@@ -126,8 +170,9 @@ class PyMailApp(ttk.Window):
             self.log(f"🚀 [F1] Iniciando flujo de bienvenida para el curso: {id_curso}", "success")
             self.mailing_service.enviar_bienvenida_curso(id_curso)
             self.log(f"✅ [F1] Borrador generado para el curso {id_curso}. Revisa Outlook.", "success")
-        except Exception as e:
-            self.log(f"🔥 [F1] Error: {e}", "danger")
+        except Exception:
+            logger.exception(f"Error en el flujo de bienvenida para el curso {id_curso}")
+            self.log(f"🔥 [F1] Error crítico. Revisa app.log para detalles.", "danger")
 
     def f2_inicio_docentes(self):
         id_curso = self.f2_id_curso.get().strip()
@@ -139,16 +184,18 @@ class PyMailApp(ttk.Window):
             self.log(f"🚀 [F2] Iniciando flujo de inicio para docentes del curso: {id_curso}", "info")
             self.mailing_service.enviar_inicio_docentes(id_curso)
             self.log(f"✅ [F2] Borradores generados para el curso {id_curso}. Revisa Outlook.", "info")
-        except Exception as e:
-            self.log(f"🔥 [F2] Error: {e}", "danger")
+        except Exception:
+            logger.exception(f"Error en el flujo de inicio para docentes del curso {id_curso}")
+            self.log(f"🔥 [F2] Error crítico. Revisa app.log para detalles.", "danger")
 
     def f3_informe_semanal(self):
         try:
             self.log("🚀 [F3] Iniciando flujo de informe semanal.", "warning")
             self.mailing_service.enviar_informe_semanal()
             self.log("✅ [F3] Borrador de informe semanal generado. Revisa Outlook.", "warning")
-        except Exception as e:
-            self.log(f"🔥 [F3] Error: {e}", "danger")
+        except Exception:
+            logger.exception("Error en el flujo de informe semanal")
+            self.log(f"🔥 [F3] Error crítico. Revisa app.log para detalles.", "danger")
 
 def main():
     """Punto de entrada para la aplicación gráfica."""

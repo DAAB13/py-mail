@@ -4,6 +4,7 @@ import sys
 import time
 from loguru import logger
 from services.mailing import MailingService
+from config.logging_config import setup_logging
 
 def mostrar_bienvenida():
     """Un saludo con un toque de estilo."""
@@ -12,13 +13,14 @@ def mostrar_bienvenida():
     print("="*50)
 
 def main():
+    setup_logging()
     mostrar_bienvenida()
     
     # Inicializamos el servicio
     try:
         service = MailingService()
-    except Exception as e:
-        logger.critical(f"No se pudo iniciar el servicio: {e}")
+    except Exception:
+        logger.exception("No se pudo iniciar el servicio de mailing")
         input("\nPresiona Enter para salir...")
         return
 
@@ -67,8 +69,8 @@ def main():
         except KeyboardInterrupt:
             print("\n\nSaliendo por interrupción de usuario...")
             break
-        except Exception as e:
-            logger.error(f"Error durante la operación: {e}")
+        except Exception:
+            logger.exception("Error no controlado durante la operación")
             print("Hubo un problema, pero seguimos adelante...")
 
 if __name__ == "__main__":

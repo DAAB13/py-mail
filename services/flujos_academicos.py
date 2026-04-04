@@ -68,8 +68,8 @@ class FlujosAcademicos:
                 sesiones=sesiones_formateadas,
                 **self.core.config.get("content_vars", {})
             )
-        except Exception as e:
-            logger.error(f"Error renderizando plantilla: {e}")
+        except Exception:
+            logger.exception("Error crítico al renderizar la plantilla de bienvenida")
             return
 
         # Preparar Asunto dinámico
@@ -80,8 +80,8 @@ class FlujosAcademicos:
                 id=id_objetivo,
                 nrc=sesion_principal.nrc
             )
-        except Exception as e:
-            logger.warning(f"Error al formatear asunto: {e}. Usando fallback.")
+        except Exception:
+            logger.warning("Error al formatear el asunto dinámico. Usando fallback.")
             asunto = f"Bienvenido al curso {sesion_principal.curso}"
 
         # Preparar Adjuntos
@@ -123,8 +123,8 @@ class FlujosAcademicos:
         
         try:
             template = self.core.jinja_env.get_template("inicio_docentes.html")
-        except Exception as e:
-            logger.error(f"Plantilla no encontrada: {e}")
+        except Exception:
+            logger.exception("Plantilla de inicio de docentes no encontrada o con errores")
             return
 
         # Preparar Adjuntos
@@ -149,13 +149,17 @@ class FlujosAcademicos:
                 logger.warning(f"Docente {nombre} no tiene correo registrado.")
                 continue
 
-            html = template.render(
-                nombre_docente=nombre,
-                curso=sesiones_docente_raw[0].curso,
-                nrc=sesiones_docente_raw[0].nrc,
-                sesiones=sesiones_docente,
-                **self.core.config.get("content_vars", {})
-            )
+            try:
+                html = template.render(
+                    nombre_docente=nombre,
+                    curso=sesiones_docente_raw[0].curso,
+                    nrc=sesiones_docente_raw[0].nrc,
+                    sesiones=sesiones_docente,
+                    **self.core.config.get("content_vars", {})
+                )
+            except Exception:
+                logger.exception(f"Error renderizando plantilla para el docente {nombre}")
+                continue
             
             subject_template = conf.get("subject", "Inicio de Clases: {curso}")
             try:
@@ -166,9 +170,9 @@ class FlujosAcademicos:
                     codigo_banner=cod_docente,
                     nrc=sesiones_docente_raw[0].nrc
                 )
-            except Exception as e:
-                logger.warning(f"Error al formatear asunto: {e}. Usando fallback.")
-                asunto = f"Inicio de Curso: {sesiones_docente[0].curso}"
+            except Exception:
+                logger.warning(f"Error al formatear asunto para {nombre}. Usando fallback.")
+                asunto = f"Inicio de Curso: {sesiones_docente[0]['curso']}"
             
             self.core.outlook.enviar(
                 destinatario=email_dest,

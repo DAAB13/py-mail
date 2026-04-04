@@ -19,8 +19,8 @@ class OutlookMail:
             pythoncom.CoInitialize()
             self.app = win32.Dispatch("Outlook.Application")
             logger.info("Conexión con Outlook establecida/refrescada.")
-        except Exception as e:
-            logger.error(f"Error al conectar con Outlook: {e}")
+        except Exception:
+            logger.exception("Error crítico al establecer conexión con Outlook Classic")
             self.app = None
 
     def enviar(
@@ -59,6 +59,6 @@ class OutlookMail:
             
             logger.success(f"Borrador guardado y mostrado para: {destinatario}")
             return True
-        except Exception as e:
-            logger.error(f"Error en Outlook (posible hilo o desconexión): {e}")
+        except Exception:
+            logger.exception("Error crítico en la operación de Outlook (posible hilo o desconexión)")
             return False

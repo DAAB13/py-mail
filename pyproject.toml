@@ -15,3 +15,12 @@ dependencies = [
     "toml>=0.10.2",
     "ttkbootstrap>=1.20.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

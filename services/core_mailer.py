@@ -19,8 +19,12 @@ class CoreMailer:
         # Cargar configuración desde TOML
         config_path = Path("config/config.toml")
         if config_path.exists():
-            self.config = toml.load(config_path)
-            logger.info("Configuración cargada correctamente desde config.toml")
+            try:
+                self.config = toml.load(config_path)
+                logger.info("Configuración cargada correctamente desde config.toml")
+            except Exception:
+                logger.exception("Error crítico al parsear config/config.toml")
+                self.config = {}
         else:
             self.config = {}
             logger.warning("No se encontró config/config.toml. Se usará configuración por defecto.")

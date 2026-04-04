@@ -64,8 +64,8 @@ class FlujosReportes:
                 reprogramadas_lista=repro_lista,
                 todas_sesiones=sesiones_semana
             )
-        except Exception as e:
-            logger.error(f"Error renderizando informe semanal: {e}")
+        except Exception:
+            logger.exception("Error crítico al renderizar el informe semanal")
             return
 
         subject_template = conf.get("subject", "Reporte semanal supervisión")
