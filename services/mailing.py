@@ -97,12 +97,40 @@ class MailingService:
         
         # Renderizado
         try:
+            # Formatear sesiones para la plantilla
+            sesiones_formateadas = []
+            for s in sesiones_id:
+                # Intentar formatear fecha si es posible, si no, usar original
+                # El usuario pide dd/mm/aaaa y hh:mm
+                # Asumimos que vienen como strings o objetos que podemos manipular
+                # Si son strings "2026-04-01", los pasamos a "01/04/2026"
+                
+                fecha_str = str(s.fechas)
+                # Intento de parseo simple si viene ISO
+                if "-" in fecha_str and len(fecha_str) >= 10:
+                    parts = fecha_str.split("-")
+                    if len(parts[0]) == 4: # yyyy-mm-dd
+                        fecha_str = f"{parts[2][:2]}/{parts[1]}/{parts[0]}"
+
+                hora_i = str(s.hora_inicio)[:5] # hh:mm
+                hora_f = str(s.hora_fin)[:5]    # hh:mm
+
+                sesiones_formateadas.append({
+                    'sesion': s.sesion,
+                    'fecha': fecha_str,
+                    'hora_inicio': hora_i,
+                    'hora_fin': hora_f,
+                    'tipo': s.soporte or "Clase"
+                })
+
             template = self.jinja_env.get_template("bienvenida_alumnos.html")
             html_contenido = template.render(
                 curso=sesion_principal.curso,
+                periodo=sesion_principal.periodo,
                 nrc=sesion_principal.nrc,
                 docente=sesion_principal.docente,
-                sesiones=sesiones_id # Pasamos TODA la lista de sesiones
+                sesiones=sesiones_formateadas,
+                **self.config.get("content_vars", {})
             )
         except Exception as e:
             logger.error(f"Error renderizando plantilla: {e}")
@@ -172,15 +200,34 @@ class MailingService:
             info_docente = next((d for d in todos_los_docentes if d.codigo_banner == cod_docente), None)
             
             # Sesiones de ESTE docente en ESTE curso
-            sesiones_docente = [s for s in sesiones_id if s.codigo_banner == cod_docente]
+            sesiones_docente_raw = sorted([s for s in sesiones_id if s.codigo_banner == cod_docente], key=lambda x: x.sesion)
             
+            # Formatear sesiones para la plantilla
+            sesiones_docente = []
+            for s in sesiones_docente_raw:
+                fecha_str = str(s.fechas)
+                if "-" in fecha_str and len(fecha_str) >= 10:
+                    parts = fecha_str.split("-")
+                    if len(parts[0]) == 4: # yyyy-mm-dd
+                        fecha_str = f"{parts[2][:2]}/{parts[1]}/{parts[0]}"
+
+                hora_i = str(s.hora_inicio)[:5]
+                hora_f = str(s.hora_fin)[:5]
+
+                sesiones_docente.append({
+                    'sesion': s.sesion,
+                    'fecha': fecha_str,
+                    'hora_inicio': hora_i,
+                    'hora_fin': hora_f
+                })
+
             # Determinar destinatario
             email_dest = None
             if info_docente:
                 email_dest = info_docente.email_upn or info_docente.email_personal
                 nombre = info_docente.nombre_docente
             else:
-                nombre = sesiones_docente[0].docente
+                nombre = sesiones_docente_raw[0].docente
                 logger.warning(f"Docente {nombre} no encontrado en maestro de docentes.")
                 continue
 
@@ -191,18 +238,21 @@ class MailingService:
             # Renderizado individual
             html = template.render(
                 nombre_docente=nombre,
-                curso=sesiones_docente[0].curso,
-                nrc=sesiones_docente[0].nrc,
-                sesiones=sesiones_docente
+                curso=sesiones_docente_raw[0].curso,
+                nrc=sesiones_docente_raw[0].nrc,
+                sesiones=sesiones_docente,
+                **self.config.get("content_vars", {})
             )
             
             # Preparar Asunto dinámico
             subject_template = conf.get("subject", "Inicio de Clases: {curso}")
             try:
                 asunto = subject_template.format(
-                    curso=sesiones_docente[0].curso,
+                    fecha_inicio=sesiones_docente[0]['fecha'],
+                    curso=sesiones_docente_raw[0].curso,
+                    id=id_objetivo,
                     codigo_banner=cod_docente,
-                    nrc=sesiones_docente[0].nrc
+                    nrc=sesiones_docente_raw[0].nrc
                 )
             except Exception as e:
                 logger.warning(f"Error al formatear asunto: {e}. Usando fallback.")
@@ -215,6 +265,95 @@ class MailingService:
                 adjuntos=adjuntos
             )
             logger.success(f"Correo preparado para el docente: {nombre} con {len(adjuntos)} adjuntos.")
+
+    def enviar_informe_semanal(self):
+        """[Flujo 3] Envía un reporte consolidado de la semana actual a William."""
+        from datetime import datetime, timedelta
+        
+        logger.info("Generando Informe Semanal de Supervisión...")
+        
+        # 1. Determinar rango: Lunes a Domingo de la semana actual
+        hoy = datetime.now()
+        # En Python, lunes es 0, domingo es 6
+        dia_semana = hoy.weekday() 
+        lunes = hoy - timedelta(days=dia_semana)
+        domingo = lunes + timedelta(days=6)
+        
+        fecha_lunes_str = lunes.strftime("%d/%m")
+        fecha_domingo_str = domingo.strftime("%d/%m")
+        
+        # Para filtrar los datos (asumiendo formato yyyy-mm-dd en el parquet)
+        inicio_iso = lunes.strftime("%Y-%m-%d")
+        fin_iso = domingo.strftime("%Y-%m-%d")
+
+        # 2. Cargar datos
+        todas_las_sesiones = data_loader.load_programacion()
+        
+        # 3. Filtrar y Procesar
+        sesiones_semana = []
+        for s in todas_las_sesiones:
+            # Filtro por rango de fechas (comparación de strings ISO es válida)
+            if inicio_iso <= str(s.fechas) <= fin_iso:
+                # Formatear para la tabla
+                f_raw = str(s.fechas)
+                f_formateada = f"{f_raw[8:10]}/{f_raw[5:7]}/{f_raw[0:4]}" if "-" in f_raw else f_raw
+                
+                sesiones_semana.append({
+                    'fecha': f_formateada,
+                    'fecha_iso': f_raw, # para ordenar
+                    'periodo': s.periodo,
+                    'nrc': s.nrc,
+                    'curso': s.curso,
+                    'sesion': s.sesion,
+                    'estado': str(s.estado_clase).upper(),
+                    'docente': s.docente
+                })
+
+        if not sesiones_semana:
+            logger.warning("No hay sesiones registradas para esta semana.")
+            return
+
+        # Ordenar por fecha (antigua a actual)
+        sesiones_semana.sort(key=lambda x: x['fecha_iso'])
+
+        # 4. Estadísticas
+        total_p = len(sesiones_semana)
+        total_d = sum(1 for s in sesiones_semana if s['estado'] == 'DICTADA')
+        total_r = sum(1 for s in sesiones_semana if s['estado'] == 'REPROGRAMADA')
+        
+        repro_lista = [s for s in sesiones_semana if s['estado'] == 'REPROGRAMADA']
+
+        # 5. Configuración y Renderizado
+        conf = self._get_template_config("informe_semanal")
+        destinatario = conf.get("fixed_recipient", "william.cruzado@upn.edu.pe")
+        
+        try:
+            template = self.jinja_env.get_template("informe_semanal.html")
+            html = template.render(
+                total_programadas=total_p,
+                total_dictadas=total_d,
+                total_reprogramadas=total_r,
+                reprogramadas_lista=repro_lista,
+                todas_sesiones=sesiones_semana
+            )
+        except Exception as e:
+            logger.error(f"Error renderizando informe semanal: {e}")
+            return
+
+        # 6. Asunto dinámico
+        subject_template = conf.get("subject", "Reporte semanal supervisión")
+        asunto = subject_template.format(
+            fecha_lunes=fecha_lunes_str,
+            fecha_domingo=fecha_domingo_str
+        )
+
+        # 7. Envío
+        self.outlook.enviar(
+            destinatario=destinatario,
+            asunto=asunto,
+            cuerpo_html=html
+        )
+        logger.success(f"Informe semanal enviado a {destinatario} con {total_p} sesiones analizadas.")
 
 if __name__ == "__main__":
     service = MailingService()

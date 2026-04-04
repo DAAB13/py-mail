@@ -20,17 +20,40 @@ attachments_path = "PATH_ADJUNTOS_ALUMNOS"
 type = "student_welcome"
 
 [templates.inicio_docentes]
-subject = "Inicio de Clases: {curso} ({codigo_banner})"
-attachments = ["manual_docente.pdf", "formato_sesion.xlsx"]
+subject = "Inicio de curso: {fecha_inicio} - {curso} - {id}"
+attachments = ["FONT PRINCIPAL SHARP GROTESK BOOK_SEMIBOLD_ BOLD.zip", "Manual Portal Académico.pdf"]
 attachments_path = "PATH_ADJUNTOS_DOCENTES"
 type = "teacher_start"
 
 
 [templates.informe_semanal]
-subject = "Informe Semanal de Sesiones - Semana {semana_del_anio}"
-fixed_recipient = "william.coordinador@upn.edu.pe"
+subject = "Reporte semanal supervisión - {fecha_lunes} al {fecha_domingo}"
+fixed_recipient = "william.cruzado@upn.edu.pe"
 type = "weekly_report"
 
 [business_rules]
 # Aquí podemos meter reglas como el límite de alumnos por correo en CCO, etc.
 max_recipients_cco = 50
+
+[content_vars]
+# Enlaces generales
+url_mimundo = "https://mimundo.upn.edu.pe/"
+url_contacto = "https://contacto.upn.edu.pe/"
+url_intranet = "https://intranet.upn.edu.pe/WebLogin/"
+url_tutoriales_alumnos = "https://bit.ly/3YFhB0S"
+url_tutoriales_docentes = "https://bit.ly/3YFhB0S" # Actualizar si hay uno específico
+
+# Correos y Soporte
+email_ayuda_clave = "ayudaclave@upn.edu.pe"
+email_soporte_tic = "mesaayudaupn@upn.edu.pe"
+whatsapp_upn = "+51 914 800 800"
+whatsapp_arturo = "+51 951 750 111"
+
+# Personal de Coordinación
+coordinador_nombre = "William Cruzado"
+coordinador_cargo = "Coordinador de Operaciones"
+coordinador_email = "william.cruzado@upn.edu.pe"
+
+asistente_nombre = "Diego Alvarado"
+asistente_cargo = "Asistente de Operaciones"
+asistente_email = "diego.alvarado@upn.edu.pe"

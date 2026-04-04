@@ -1,3 +1,7 @@
+---
+proyecto: "[[00-py-mail]]"
+---
+
 # ROADMAP
 
 ## ✅ Fase 1: Cimientos (Completado)
@@ -9,8 +13,8 @@
 ## 🚀 Fase 2: Implementación (En proceso)
 - [x] Flujo 1: Bienvenida Alumnos (BCC + Tabla de sesiones).
 - [x] Flujo 2: Inicio Docentes (Individual + Horario específico).
-- [ ] Flujo 3: Informe Semanal (Coordinación).
-- [ ] Adjuntos: Lógica para incluir archivos por ID de curso.
+- [x] Flujo 3: Informe Semanal (Coordinación).
+- [x] Adjuntos: Lógica para incluir archivos por ID de curso.
 
 ## 🎨 Fase 3: Interfaz (Futuro)
 - [ ] Migración de consola a **Flet** (UI Desktop).

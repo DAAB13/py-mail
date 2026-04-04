@@ -1,53 +1,263 @@
-<!-- templates/bienvenida_alumnos.html -->
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header { background-color: #003594; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; border: 1px solid #ddd; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.9em; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        .footer { color: #888; font-size: 0.8em; margin-top: 20px; text-align: center; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #e7e7e7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #000000;
+      line-height: 1.6;
+    }
+    .wrapper {
+      width: 100%;
+      table-layout: fixed;
+      background-color: #e7e7e7;
+      padding: 40px 0;
+    }
+    .main {
+      background-color: #ffffff;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 660px;
+      border-top: 8px solid #fca311;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .content {
+      padding: 40px 40px;
+    }
+    p {
+      margin-bottom: 18px;
+      text-align: justify; 
+    }
+    
+    /* --- TABLA DE INFO GENERAL MEJORADA --- */
+    .data-table {
+      width: 100%;
+      border-collapse: separate; /* Permite bordes redondeados perfectos */
+      border-spacing: 0;
+      margin: 25px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03); /* Sombra sutil para darle profundidad */
+      overflow: hidden;
+    }
+    .data-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: 600;
+      color: #333333;
+      width: 20%;
+      background-color: #fcfcfc; /* Gris extraclaro para diferenciar la columna */
+      border-right: 1px solid #f0f0f0; /* Línea separadora vertical */
+    }
+    /* -------------------------------------- */
+
+    .sessions-container {
+      margin: 25px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e7e7e7;
+    }
+    .sessions-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95em;
+      text-align: center; 
+    }
+    .sessions-table th {
+      background-color: #000000; 
+      color: #ffffff;
+      padding: 14px 15px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85em;
+    }
+    .sessions-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e7e7e7;
+      color: #000000;
+    }
+    .sessions-table tr:last-child td {
+      border-bottom: none;
+    }
+    .sessions-table tr:nth-child(even) {
+      background-color: #f9f9f9; 
+    }
+    
+    /* --- BOTÓN --- */
+    .btn {
+      display: inline-block;
+      background-color: #fca311;
+      color: #000000 !important;
+      text-decoration: none;
+      padding: 14px 35px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+    }
+    /* ------------- */
+
+    ul {
+      margin-top: 0;
+      margin-bottom: 20px;
+      padding-left: 20px;
+      text-align: left;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    .contact-box {
+      background-color: #f9f9f9;
+      border-left: 5px solid #fca311;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 0 4px 4px 0;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #e7e7e7;
+      margin: 35px 0;
+    }
+    a {
+      color: #fca311;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>¡Bienvenido a tu curso!</h1>
-        </div>
-        <div class="content">
-            <p>Hola,</p>
-            <p>Te damos la bienvenida al curso <strong>{{ curso }}</strong> (NRC: {{ nrc }}).</p>
-            <p>A continuación, te detallamos la programación de todas tus sesiones para que las tengas presentes:</p>
-            
-            <table>
-                <thead>
+  <table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table class="main" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="content">
+              
+              <p>Estimado(a) estudiante, </p>
+              <p>Reciba un cordial saludo a nombre de la Escuela de Posgrado y Estudios Continuos de la Universidad Privada del Norte (UPN).</p>
+              <p>Con entusiasmo le damos la bienvenida al programa. A continuación, le compartimos información importante para el inicio de clases:</p>
+              
+              <table class="data-table" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td class="label">🔹 Curso:</td>
+                  <td><strong>{{ curso }}</strong></td>
+                </tr>
+                <tr>
+                  <td class="label">🔹 Periodo:</td>
+                  <td>{{ periodo }}</td>
+                </tr>
+                <tr>
+                  <td class="label">🔹 NRC:</td>
+                  <td>{{ nrc }}</td>
+                </tr>
+                <tr>
+                  <td class="label">🔹 Docente:</td>
+                  <td>{{ docente }}</td>
+                </tr>
+              </table>
+
+              <p style="margin-bottom: 10px; text-align: left;">📅 <strong>Cronograma de sesiones:</strong></p>
+              <div class="sessions-container">
+                <table class="sessions-table">
+                  <thead>
                     <tr>
-                        <th>Sesión</th>
-                        <th>Fecha</th>
-                        <th>Horario</th>
+                      <th># Sesión</th>
+                      <th>Fecha</th>
+                      <th>Horario (Inicio - Fin)</th>
                     </tr>
-                </thead>
-                <tbody>
+                  </thead>
+                  <tbody>
                     {% for s in sesiones %}
                     <tr>
-                        <td>{{ s.sesion }}</td>
-                        <td>{{ s.fechas }}</td>
-                        <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+                      <td><strong>{{ s.sesion }}</strong></td>
+                      <td>{{ s.fecha }}</td>
+                      <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
                     </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+                  </tbody>
+                </table>
+              </div>
 
-            <p><strong>Docente principal:</strong> {{ docente }}</p>
-            <p>¡Muchos éxitos en este inicio de clases!</p>
-        </div>
-        <div class="footer">
-            Este es un correo informativo generado por el Asistente Académico.
-        </div>
-    </div>
+              <p style="text-align: center;">🔗 <strong>Clases en vivo:</strong><br>
+              El acceso será a través del Aula Virtual UPN:</p>
+              
+              <table border="0" cellspacing="0" cellpadding="0" role="presentation" align="center" style="margin: 20px auto;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ url_mimundo }}" class="btn">👉 Acceder a Mi Mundo UPN</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p>En el presente correo adjuntamos lo siguiente:</p>
+              <ul>
+                <li>Silabo del curso (Calendario académico y de evaluaciones).</li>
+                <li>Carta de responsabilidades del estudiante 2026.</li>
+                <li>Manual de generación de clave.</li>
+              </ul>
+
+              <div class="contact-box">
+                <p style="text-align: left;">📌 <strong>¿Inconvenientes de acceso?</strong> Escribe a <a href="mailto:{{ email_ayuda_clave }}">{{ email_ayuda_clave }}</a> adjuntando:</p>
+                <ul style="margin-bottom: 0; font-size: 0.9em; color: #000000;">
+                  <li>Nombre completo y Código de alumno.</li>
+                  <li>Correo personal y Número de celular.</li>
+                  <li>Fecha de nacimiento.</li>
+                </ul>
+              </div>
+
+              <p>🔗 Otros canales de atención:</p>
+              <ul>
+                <li>Tickets de soporte: <a href="{{ url_contacto }}">{{ url_contacto|replace('https://', '') }}</a></li>
+                <li>WhatsApp UPN: <strong>{{ whatsapp_upn }}</strong></li>
+              </ul>
+
+              <hr class="divider">
+
+              <p style="text-align: left;">📌 <strong>Muy importante:</strong></p>
+              <ul style="font-size: 0.95em;">
+                <li>Materiales disponibles en el aula virtual.</li>
+                <li>Puntualidad al iniciar las sesiones.</li>
+                <li>Descargue materiales y grabaciones (disponibles hasta 7 días tras el fin del curso).</li>
+                <li>Tutoriales Blackboard Ultra: <a href="{{ url_tutoriales_alumnos }}">Ver Recursos</a></li>
+              </ul>
+
+              <hr class="divider">
+
+              <p style="text-align: left;">🙋‍♂️ <strong>Soporte Académico y Administrativo:</strong></p>
+
+              <div class="contact-box">
+                <p style="margin-bottom: 10px; margin-top: 0; text-align: left;">• <strong>{{ coordinador_nombre }}</strong><br>
+                <span style="font-size: 0.9em;">{{ coordinador_cargo }}</span><br>
+                📧 <a href="mailto:{{ coordinador_email }}">{{ coordinador_email }}</a></p>
+                
+                <p style="margin-bottom: 0; margin-top: 15px; text-align: left;">• <strong>{{ asistente_nombre }}</strong><br>
+                <span style="font-size: 0.9em;">{{ asistente_cargo }}</span><br>
+                📧 <a href="mailto:{{ asistente_email }}">{{ asistente_email }}</a></p>
+              </div>
+
+              <p style="margin-top: 30px;">¡Le deseamos una excelente experiencia de aprendizaje!</p>
+              <p>Atentamente,</p>
+              <p><strong>Escuela de Posgrado UPN</strong></p>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

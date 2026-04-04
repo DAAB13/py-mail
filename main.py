@@ -50,7 +50,7 @@ def main():
                     print("❌ El ID no puede estar vacío.")
             
             elif opcion == "3":
-                print(f"\n⚠️ La opción {opcion} todavía está en desarrollo.")
+                service.enviar_informe_semanal()
             
             elif opcion == "0":
                 print("\n¡Cerrando el sistema! Que tengas un gran día, Diego.")

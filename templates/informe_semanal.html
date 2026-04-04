@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      color: #333333;
+      line-height: 1.5;
+      background-color: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    /* --- TARJETAS DE RESUMEN --- */
+    .stats-row {
+      display: table;
+      width: 100%;
+      margin-bottom: 25px;
+      border-spacing: 15px 0;
+    }
+    .stat-card {
+      display: table-cell;
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-top: 4px solid #14213d;
+      padding: 15px;
+      text-align: center;
+      border-radius: 6px;
+      width: 33.33%;
+    }
+    .stat-card.dictadas { border-top-color: #28a745; }
+    .stat-card.reprogramadas { border-top-color: #dc3545; }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000000;
+      margin: 5px 0;
+    }
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666666;
+    }
+
+    /* --- TABLA DE REPORTE --- */
+    .table-container {
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .report-table th {
+      background-color: #14213d;
+      color: #ffffff;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+      border: 1px solid #ddd;
+    }
+    .report-table td {
+      padding: 6px 10px; /* Menos altura como se solicitó */
+      border: 1px solid #ddd;
+      color: #444;
+    }
+    .report-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    /* Estados */
+    .status-badge {
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    .dictada { color: #1e7e34; background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .reprogramada { color: #bd2130; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    
+    /* --- RESUMEN DE REPROGRAMADAS --- */
+    .repro-summary {
+      background-color: #fff9f9;
+      border: 1px solid #f5c6cb;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+    }
+    .repro-item {
+      margin-bottom: 5px;
+      border-bottom: 1px dotted #dc3545;
+      padding-bottom: 5px;
+    }
+    .repro-item:last-child { border-bottom: none; }
+
+    /* --- RESPONSIVIDAD SIMULADA --- */
+    @media screen and (max-width: 600px) {
+      .stat-card { display: block; width: 100%; margin-bottom: 10px; }
+      .stats-row { display: block; border-spacing: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <p>Estimado <strong>William</strong>,</p>
+  <p>Le comparto el estado de las sesiones correspondientes a esta semana (Lunes a Domingo):</p>
+
+  <!-- Tarjetas de Resumen -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_programadas }}</div>
+      <div class="stat-label">Sesiones Programadas</div>
+    </div>
+    <div class="stat-card dictadas">
+      <div class="stat-value">{{ total_dictadas }}</div>
+      <div class="stat-label">Sesiones Dictadas</div>
+    </div>
+    <div class="stat-card reprogramadas">
+      <div class="stat-value">{{ total_reprogramadas }}</div>
+      <div class="stat-label">Sesiones Reprogramadas</div>
+    </div>
+  </div>
+
+  <!-- Resumen de Reprogramadas -->
+  {% if reprogramadas_lista %}
+  <div class="repro-summary">
+    <p style="margin-top:0; color: #721c24; font-weight: bold;">⚠️ Detalle de Sesiones Reprogramadas:</p>
+    {% for r in reprogramadas_lista %}
+    <div class="repro-item">
+      • [{{ r.periodo }}] <strong>NRC: {{ r.nrc }}</strong> - {{ r.fecha }} | Docente: {{ r.docente }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Tabla Detallada -->
+  <div class="table-container">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th style="width: 70px;">FECHAS</th>
+          <th style="width: 50px;">PERIODO</th>
+          <th style="width: 50px;">NRC</th>
+          <th>CURSO</th>
+          <th style="width: 30px;">#SES</th>
+          <th style="width: 90px;">ESTADO</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in todas_sesiones %}
+        <tr>
+          <td style="white-space: nowrap;">{{ s.fecha }}</td>
+          <td>{{ s.periodo }}</td>
+          <td>{{ s.nrc }}</td>
+          <td>{{ s.curso }}</td>
+          <td align="center">{{ s.sesion }}</td>
+          <td align="center">
+            {% if s.estado == 'DICTADA' %}
+              <span class="status-badge dictada">DICTADA</span>
+            {% elif s.estado == 'REPROGRAMADA' %}
+              <span class="status-badge reprogramada">REPROGRAMADA</span>
+            {% else %}
+              <span class="status-badge" style="background:#eee; color:#666;">{{ s.estado }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top: 30px; font-size: 11px; color: #999;">Generado automáticamente por el Asistente Académico UPN.</p>
+</div>
+
+</body>
+</html>
