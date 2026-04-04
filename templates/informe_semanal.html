@@ -142,7 +142,7 @@
     <p style="margin-top:0; color: #721c24; font-weight: bold;">⚠️ Detalle de Sesiones Reprogramadas:</p>
     {% for r in reprogramadas_lista %}
     <div class="repro-item">
-      • [{{ r.periodo }}] <strong>NRC: {{ r.nrc }}</strong> - {{ r.fecha }} | Docente: {{ r.docente }}
+      • <strong>{{ r.periodo }}.{{ r.nrc }}</strong> - {{ r.fecha }} | Docente: {{ r.docente }}
     </div>
     {% endfor %}
   </div>

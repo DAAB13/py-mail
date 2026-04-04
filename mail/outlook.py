@@ -34,11 +34,11 @@ class OutlookMail:
     ):
         """Prepara, guarda en borradores y muestra un correo."""
         try:
-            # Si no hay app o la conexión parece muerta, reintentamos conectar
-            if not self.app:
-                self._conectar()
+            # Clave para hilos: inicializar COM en el hilo actual y conectar
+            pythoncom.CoInitialize()
+            app = win32.Dispatch("Outlook.Application")
 
-            mail = self.app.CreateItem(0)  # 0 = olMailItem
+            mail = app.CreateItem(0)  # 0 = olMailItem
             mail.To = destinatario
             if cc:
                 mail.CC = cc
@@ -60,7 +60,5 @@ class OutlookMail:
             logger.success(f"Borrador guardado y mostrado para: {destinatario}")
             return True
         except Exception as e:
-            logger.error(f"Error en Outlook (posible desconexión): {e}")
-            # Si falla por RPC, marcamos como None para que el próximo intento reconecte
-            self.app = None
+            logger.error(f"Error en Outlook (posible hilo o desconexión): {e}")
             return False
