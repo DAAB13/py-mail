@@ -24,8 +24,8 @@ class MailingService:
     def enviar_inicio_docentes(self, id_objetivo: str):
         self.flujos_academicos.enviar_inicio_docentes(id_objetivo)
 
-    def enviar_informe_semanal(self):
-        self.flujos_reportes.enviar_informe_semanal()
+    def enviar_informe_semanal(self, start_date: str = None, end_date: str = None):
+        self.flujos_reportes.enviar_informe_semanal(start_date, end_date)
 
 if __name__ == "__main__":
     service = MailingService()

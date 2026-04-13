@@ -48,8 +48,8 @@ max_recipients_cco = 50
 url_mimundo = "https://mimundo.upn.edu.pe/"
 url_contacto = "https://contacto.upn.edu.pe/"
 url_intranet = "https://intranet.upn.edu.pe/WebLogin/"
-url_tutoriales_alumnos = "https://bit.ly/3YFhB0S"
-url_tutoriales_docentes = "https://bit.ly/3YFhB0S" # Actualizar si hay uno específico
+url_tutoriales_alumnos = "https://educorpperu-my.sharepoint.com/personal/postgrado_upn_edu_pe/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fpostgrado%5Fupn%5Fedu%5Fpe%2FDocuments%2FSoporte%20Virtual%2FTutoriales%20Blackboard%20Ultra%2FTutoriales%20BB%20Ultra%20Estudiantes&ga=1&CT=1775796684051&OR=OWA%2DNT%2DMail&CID=e71bd604%2D5e6e%2D6f43%2D5e40%2Dde20d4b24124"
+url_tutoriales_docentes = "https://educorpperu-my.sharepoint.com/personal/postgrado_upn_edu_pe/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fpostgrado%5Fupn%5Fedu%5Fpe%2FDocuments%2FSoporte%20Virtual%2FTutoriales%20Blackboard%20Ultra%2FTutoriales%20BB%20Ultra%20Docentes&ct=1775797109320&or=OWA%2DNT%2DMail&cid=3fe59025%2D6ae7%2D5535%2Ddeec%2Da68ec22ba776&ga=1" 
 
 # Correos y Soporte
 email_ayuda_clave = "ayudaclave@upn.edu.pe"

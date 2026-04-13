@@ -12,16 +12,33 @@ class FlujosReportes:
     def __init__(self, core: CoreMailer):
         self.core = core
 
-    def enviar_informe_semanal(self):
-        """[Flujo 3] Envía un reporte consolidado de la semana actual a William."""
-        
+    def enviar_informe_semanal(self, start_date: str = None, end_date: str = None):
+        """[Flujo 3] Envía un reporte consolidado a William.
+
+        Args:
+            start_date: Fecha de inicio en formato YYYY-MM-DD.
+                        Si es None, usa el lunes de la semana actual.
+            end_date: Fecha de fin en formato YYYY-MM-DD.
+                    Si es None, usa el domingo de la semana actual.
+        """
         logger.info("Generando Informe Semanal de Supervisión...")
         
-        # 1. Determinar rango: Lunes a Domingo de la semana actual
-        hoy = datetime.now()
-        dia_semana = hoy.weekday() 
-        lunes = hoy - timedelta(days=dia_semana)
-        domingo = lunes + timedelta(days=6)
+        # 1. Determinar rango de fechas
+        if start_date and end_date:
+            try:
+                lunes = datetime.strptime(start_date, "%Y-%m-%d")
+                domingo = datetime.strptime(end_date, "%Y-%m-%d")
+            except ValueError:
+                logger.error(f"Formato de fecha inválido. Se esperaba YYYY-MM-DD. Recibido: '{start_date}', '{end_date}'")
+                return
+            if lunes > domingo:
+                logger.error("La fecha de inicio no puede ser posterior a la fecha de fin.")
+                return
+        else:
+            # Calcular lunes a domingo de la semana actual
+            hoy = datetime.now()
+            lunes = hoy - timedelta(days=hoy.weekday())
+            domingo = lunes + timedelta(days=6)
         
         fecha_lunes_str = lunes.strftime("%d/%m")
         fecha_domingo_str = domingo.strftime("%d/%m")
@@ -32,10 +49,12 @@ class FlujosReportes:
         # 2. Cargar datos
         todas_las_sesiones = data_loader.load_programacion()
         
-        # 3. Filtrar y Procesar
+        # 3. Filtrar y Procesar: rango de fechas + soporte 'diego'
         sesiones_semana = []
         for s in todas_las_sesiones:
-            if inicio_iso <= str(s.fechas) <= fin_iso:
+            es_del_rango = inicio_iso <= str(s.fechas) <= fin_iso
+            es_diego = str(s.soporte or "").strip().upper() == "DIEGO"
+            if es_del_rango and es_diego:
                 sesiones_semana.append(s.dict_plantilla)
 
         if not sesiones_semana:

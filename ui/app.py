@@ -1,7 +1,9 @@
 # ui/app.py
 import sys
 import threading
+from datetime import datetime, timedelta
 from pathlib import Path
+from tkinter import BooleanVar
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledText
@@ -19,8 +21,9 @@ class PyMailApp(ttk.Window):
         # Configuración inicial de la ventana con el tema 'litera'
         super().__init__(title="Py Mail", themename="darkly")
         setup_logging()
-        self.geometry("800x600")
-        self.resizable(False, False)
+        self.geometry("800x720")
+        self.minsize(800, 680)
+        self.resizable(False, True)
 
         # --- Animación del GIF ---
         self.gif_frames = []
@@ -101,6 +104,7 @@ class PyMailApp(ttk.Window):
         
         self.log_area = ScrolledText(main_frame, height=10, state="disabled", autohide=True)
         self.log_area.pack(fill=BOTH, expand=YES)
+        self._setup_log_tags()
 
     def create_flow_frame(self, parent, title):
         """Crea un marco estandarizado para cada flujo."""
@@ -141,12 +145,70 @@ class PyMailApp(ttk.Window):
     def create_flow3_widgets(self, parent):
         """Widgets para el Flujo 3: Informe Semanal."""
         frame = self.create_flow_frame(parent, "F3: Informe Semanal")
+        frame.grid_columnconfigure(1, weight=1)
+        frame.grid_columnconfigure(3, weight=1)
 
-        label = ttk.Label(frame, text="Genera el informe con la data actual.")
-        label.pack(side=LEFT, fill=X, expand=YES, padx=(0,15))
+        # Fila 0: toggle + botón
+        self.f3_semana_actual = BooleanVar(value=True)
+        ttk.Checkbutton(
+            frame, text="Usar semana actual",
+            variable=self.f3_semana_actual,
+            bootstyle="warning-round-toggle",
+            command=self._toggle_f3_dates,
+        ).grid(row=0, column=0, columnspan=4, sticky="w", pady=(0, 10))
 
-        button = ttk.Button(frame, text="Generar Informe", bootstyle="warning-outline", command=lambda: self.run_flow(self.f3_informe_semanal))
-        button.pack(side=RIGHT)
+        ttk.Button(
+            frame, text="Generar Informe", bootstyle="warning-outline",
+            command=lambda: self.run_flow(self.f3_informe_semanal),
+        ).grid(row=0, column=4, sticky="e", padx=(10, 0))
+
+        # Fila 1: campos de fecha
+        ttk.Label(frame, text="Inicio:").grid(row=1, column=0, padx=(0, 8), sticky="w")
+        self.f3_start = ttk.Entry(frame, bootstyle="warning")
+        self.f3_start.grid(row=1, column=1, padx=(0, 15), sticky="ew")
+
+        ttk.Label(frame, text="Fin:").grid(row=1, column=2, padx=(0, 8), sticky="w")
+        self.f3_end = ttk.Entry(frame, bootstyle="warning")
+        self.f3_end.grid(row=1, column=3, columnspan=2, sticky="ew")
+
+        # Fila 2: pista de formato (solo visible al editar manualmente)
+        self.f3_hint = ttk.Label(
+            frame,
+            text="Formato: YYYY-MM-DD  (ej. 2026-04-07 al 2026-04-13)",
+            bootstyle="secondary",
+            font=("Helvetica", 9),
+        )
+        self.f3_hint.grid(row=2, column=0, columnspan=5, sticky="w", pady=(5, 0))
+
+        self._toggle_f3_dates()
+
+    def _toggle_f3_dates(self):
+        """Habilita/deshabilita los campos de fecha según el checkbox 'Semana actual'."""
+        if self.f3_semana_actual.get():
+            hoy = datetime.now()
+            lunes = hoy - timedelta(days=hoy.weekday())
+            domingo = lunes + timedelta(days=6)
+            for entry, date in [(self.f3_start, lunes), (self.f3_end, domingo)]:
+                entry.configure(state="normal")
+                entry.delete(0, "end")
+                entry.insert(0, date.strftime("%Y-%m-%d"))
+                entry.configure(state="readonly")
+            self.f3_hint.grid_remove()
+        else:
+            self.f3_start.configure(state="normal")
+            self.f3_end.configure(state="normal")
+            self.f3_start.delete(0, "end")
+            self.f3_end.delete(0, "end")
+            self.f3_hint.grid()
+
+    def _setup_log_tags(self):
+        """Configura los colores de cada nivel de log en el área de texto."""
+        t = self.log_area.text
+        t.tag_configure("success",   foreground="#4caf50", font=("Helvetica", 10))
+        t.tag_configure("warning",   foreground="#ffc107", font=("Helvetica", 10))
+        t.tag_configure("danger",    foreground="#f44336", font=("Helvetica", 10))
+        t.tag_configure("info",      foreground="#29b6f6", font=("Helvetica", 10))
+        t.tag_configure("secondary", foreground="#adb5bd", font=("Helvetica", 10))
 
     def log(self, message, style="secondary"):
         """Añade un mensaje al área de logs de forma segura para hilos."""
@@ -189,13 +251,28 @@ class PyMailApp(ttk.Window):
             self.log(f"🔥 [F2] Error crítico. Revisa app.log para detalles.", "danger")
 
     def f3_informe_semanal(self):
+        start_date, end_date = None, None
+        if not self.f3_semana_actual.get():
+            start_date = self.f3_start.get().strip()
+            end_date = self.f3_end.get().strip()
+            if not start_date or not end_date:
+                self.log("❌ [F3] Ingresa la fecha de inicio y fin (YYYY-MM-DD).", "danger")
+                return
+            try:
+                s = datetime.strptime(start_date, "%Y-%m-%d")
+                e = datetime.strptime(end_date, "%Y-%m-%d")
+            except ValueError:
+                self.log("❌ [F3] Formato de fecha inválido. Usa YYYY-MM-DD.", "danger")
+                return
+            if s > e:
+                self.log("❌ [F3] La fecha de inicio debe ser anterior o igual a la fecha de fin.", "danger")
+                return
         try:
             self.log("🚀 [F3] Iniciando flujo de informe semanal.", "warning")
-            self.mailing_service.enviar_informe_semanal()
+            self.mailing_service.enviar_informe_semanal(start_date, end_date)
             self.log("✅ [F3] Borrador de informe semanal generado. Revisa Outlook.", "warning")
         except Exception:
-            logger.exception("Error en el flujo de informe semanal")
-            self.log(f"🔥 [F3] Error crítico. Revisa app.log para detalles.", "danger")
+            self.log("🔥 [F3] Error crítico. Revisa app.log para detalles.", "danger")
 
 def main():
     """Punto de entrada para la aplicación gráfica."""
