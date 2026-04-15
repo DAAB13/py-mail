@@ -211,41 +211,48 @@
               <p style="text-align: center;">💻 <strong>Clases en vivo:</strong><br>
               El acceso será a través del Aula Virtual UPN:</p>
               
-              <table border="0" cellspacing="0" cellpadding="0" role="presentation" align="center" style="margin: 20px auto;">
+              <table border="0" cellspacing="0" cellpadding="0" role="presentation" align="center" style="margin: 25px auto;">
                 <tr>
-                  <td align="center">
-                    <a href="{{ url_mimundo }}" class="btn">🚀 Acceder a Mi Mundo UPN</a>
+                  <td align="center" style="border-radius: 8px; overflow: hidden; box-shadow: 0 4px 14px rgba(252,163,17,0.35);">
+                    <a href="{{ url_mimundo }}" class="btn" style="display: inline-block; background: linear-gradient(135deg,#fca311 0%,#e08e00 100%); color: #000000 !important; text-decoration: none; padding: 15px 42px; border-radius: 8px; font-weight: 800; font-size: 1em; letter-spacing: 0.4px; text-align: center;">🚀 Acceder a Mi Mundo UPN</a>
                   </td>
                 </tr>
               </table>
 
+              <hr class="divider">
+
               <p>En el presente correo adjuntamos lo siguiente:</p>
               <ul>
+                <li>Reglamento de estudios de la escuela de posgrado y estudios continuos</li>
+                <li>Condiciones del servicio de enseñanza</li>
                 <li>Manual de cambio de contraseña</li>
                 <li>Manual de configuración de Microsoft Authenticator</li>
-                <li>Reglamento de estudios de la escuela de posgrado y estudios continuos</li>
               </ul>
 
               <div class="contact-box">
-                <p style="text-align: left;">📌 <strong>¿Inconvenientes de acceso?</strong> Escribe a <a href="mailto:{{ email_ayuda_clave }}">{{ email_ayuda_clave }}</a> detallando el inconveniente y adjuntando lo siguiente:</p>
+                <p style="text-align: left; margin-top: 0;">📌 <strong>¿Inconvenientes de acceso?</strong> Escribe a <a href="mailto:{{ email_ayuda_clave }}">{{ email_ayuda_clave }}</a> detallando el inconveniente y adjuntando lo siguiente:</p>
                 <ul style="margin-bottom: 0; font-size: 0.9em; color: #000000;">
-                  <li>Nombre completo </li>
+                  <li>Nombre completo</li>
                   <li>DNI y/o Código de alumno.</li>
                   <li>Correo personal y Número de celular.</li>
                   <li>Fecha de nacimiento.</li>
                 </ul>
-              </div>
 
-              <p>🔗 Otros canales de atención:</p>
-              <ul>
-                <li>Tickets de soporte: <a href="{{ url_contacto }}">{{ url_contacto|replace('https://', '') }}</a></li>
-                <li>WhatsApp UPN: <strong>{{ whatsapp_upn }}</strong></li>
-              </ul>
+                <hr style="border: none; border-top: 1px solid #e7e7e7; margin: 16px 0;">
+
+                <p style="text-align: left; margin: 0 0 8px;">🔗 <strong>Otros canales de atención:</strong></p>
+                <ul style="margin: 0; font-size: 0.9em;">
+                  <li>Tickets de soporte: <a href="{{ url_contacto }}">{{ url_contacto|replace('https://', '') }}</a></li>
+                  <li>WhatsApp UPN: <strong>{{ whatsapp_upn }}</strong></li>
+                </ul>
+              </div>
 
               <hr class="divider">
 
-              <p style="text-align: left;">📌 <strong>Muy importante:</strong></p>
+              <p style="text-align: left;">✨ <strong>Muy importante:</strong></p>
               <ul style="font-size: 0.95em;">
+                <li>Los certificados serán enviados automáticamente al correo UPN en 45 días después de haber aprobado el programa</li>
+                <li>Para los programas especializados, programa de portugués y cursos cortos no se realizan retiros</li>
                 <li>Materiales disponibles en el aula virtual.</li>
                 <li>Puntualidad al iniciar las sesiones.</li>
                 <li>Descargue materiales y grabaciones (disponibles hasta 7 días tras el fin del curso).</li>
@@ -270,7 +277,7 @@
 
               <hr class="divider">
 
-              <p style="text-align: left;">🙋‍♂️ <strong>Soporte Académico y Administrativo:</strong></p>
+              <p style="text-align: left;">🙋 <strong>Soporte Académico y Administrativo:</strong></p>
 
               <div class="contact-box">
                 <p style="margin-bottom: 10px; margin-top: 0; text-align: left;">• <strong>{{ coordinador_nombre }}</strong><br>
