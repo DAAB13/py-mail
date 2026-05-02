@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from tkinter import BooleanVar
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
+from loguru import logger
+from ttkbootstrap.constants import BOTH, E, END, HORIZONTAL, INFO, LEFT, RIGHT, SECONDARY, SUCCESS, W, X, YES
 from ttkbootstrap.scrolled import ScrolledText
 from PIL import Image, ImageTk
 
@@ -15,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from services.mailing import MailingService
 from config.logging_config import setup_logging
+
 
 class PyMailApp(ttk.Window):
     def __init__(self):
@@ -50,7 +52,7 @@ class PyMailApp(ttk.Window):
         try:
             gif_path = Path(__file__).resolve().parent.parent / "assets/megaman.gif"
             with Image.open(gif_path) as img:
-                self.gif_delay = img.info.get('duration', 100)
+                self.gif_delay = img.info.get("duration", 100)
                 for i in range(img.n_frames):
                     img.seek(i)
                     # Creamos una copia para cada frame
@@ -60,7 +62,7 @@ class PyMailApp(ttk.Window):
         except FileNotFoundError:
             self.gif_frames = []
         except Exception:
-            self.gif_frames = [] # Si hay cualquier error, no mostramos animación
+            self.gif_frames = []  # Si hay cualquier error, no mostramos animación
 
     def update_gif_frame(self, frame_num):
         """Actualiza el frame del GIF que se muestra en el Label."""
@@ -82,13 +84,18 @@ class PyMailApp(ttk.Window):
         header_frame = ttk.Frame(main_frame)
         header_frame.pack(fill=X, pady=(0, 20))
 
-        header = ttk.Label(header_frame, text="Py Mail", font=("Helvetica", 18, "bold"), bootstyle=SUCCESS)
+        header = ttk.Label(
+            header_frame,
+            text="Py Mail",
+            font=("Helvetica", 18, "bold"),
+            bootstyle=SUCCESS,
+        )
         header.pack(side=LEFT, anchor=W)
 
         if self.gif_frames:
             self.gif_label = ttk.Label(header_frame)
             self.gif_label.pack(side=RIGHT, anchor=E, padx=(0, 10))
-            self.after(0, self.update_gif_frame, 0) # Inicia la animación
+            self.after(0, self.update_gif_frame, 0)  # Inicia la animación
 
         # --- Flujos ---
         self.create_flow1_widgets(main_frame)
@@ -96,13 +103,19 @@ class PyMailApp(ttk.Window):
         self.create_flow3_widgets(main_frame)
 
         # Separador visual
-        ttk.Separator(main_frame, bootstyle=SECONDARY, orient=HORIZONTAL).pack(pady=20, fill=X)
-        
+        ttk.Separator(main_frame, bootstyle=SECONDARY, orient=HORIZONTAL).pack(
+            pady=20, fill=X
+        )
+
         # --- Área de Logs ---
-        log_header = ttk.Label(main_frame, text="Registro de Actividad", font=("Helvetica", 12, "bold"))
+        log_header = ttk.Label(
+            main_frame, text="Registro de Actividad", font=("Helvetica", 12, "bold")
+        )
         log_header.pack(pady=(0, 10))
-        
-        self.log_area = ScrolledText(main_frame, height=10, state="disabled", autohide=True)
+
+        self.log_area = ScrolledText(
+            main_frame, height=10, state="disabled", autohide=True
+        )
         self.log_area.pack(fill=BOTH, expand=YES)
         self._setup_log_tags()
 
@@ -125,7 +138,12 @@ class PyMailApp(ttk.Window):
         self.f1_id_curso = ttk.Entry(frame, bootstyle=SUCCESS)
         self.f1_id_curso.grid(row=0, column=1, padx=5, sticky="ew")
 
-        button = ttk.Button(frame, text="Generar Borrador", bootstyle="success-outline", command=lambda: self.run_flow(self.f1_bienvenida))
+        button = ttk.Button(
+            frame,
+            text="Generar Borrador",
+            bootstyle="success-outline",
+            command=lambda: self.run_flow(self.f1_bienvenida),
+        )
         button.grid(row=0, column=2, padx=(10, 0))
 
     def create_flow2_widgets(self, parent):
@@ -139,7 +157,12 @@ class PyMailApp(ttk.Window):
         self.f2_id_curso = ttk.Entry(frame, bootstyle=INFO)
         self.f2_id_curso.grid(row=0, column=1, padx=5, sticky="ew")
 
-        button = ttk.Button(frame, text="Generar Borradores", bootstyle="info-outline", command=lambda: self.run_flow(self.f2_inicio_docentes))
+        button = ttk.Button(
+            frame,
+            text="Generar Borradores",
+            bootstyle="info-outline",
+            command=lambda: self.run_flow(self.f2_inicio_docentes),
+        )
         button.grid(row=0, column=2, padx=(10, 0))
 
     def create_flow3_widgets(self, parent):
@@ -151,14 +174,17 @@ class PyMailApp(ttk.Window):
         # Fila 0: toggle + botón
         self.f3_semana_actual = BooleanVar(value=True)
         ttk.Checkbutton(
-            frame, text="Usar semana actual",
+            frame,
+            text="Usar semana actual",
             variable=self.f3_semana_actual,
             bootstyle="warning-round-toggle",
             command=self._toggle_f3_dates,
         ).grid(row=0, column=0, columnspan=4, sticky="w", pady=(0, 10))
 
         ttk.Button(
-            frame, text="Generar Informe", bootstyle="warning-outline",
+            frame,
+            text="Generar Informe",
+            bootstyle="warning-outline",
             command=lambda: self.run_flow(self.f3_informe_semanal),
         ).grid(row=0, column=4, sticky="e", padx=(10, 0))
 
@@ -204,10 +230,10 @@ class PyMailApp(ttk.Window):
     def _setup_log_tags(self):
         """Configura los colores de cada nivel de log en el área de texto."""
         t = self.log_area.text
-        t.tag_configure("success",   foreground="#4caf50", font=("Helvetica", 10))
-        t.tag_configure("warning",   foreground="#ffc107", font=("Helvetica", 10))
-        t.tag_configure("danger",    foreground="#f44336", font=("Helvetica", 10))
-        t.tag_configure("info",      foreground="#29b6f6", font=("Helvetica", 10))
+        t.tag_configure("success", foreground="#4caf50", font=("Helvetica", 10))
+        t.tag_configure("warning", foreground="#ffc107", font=("Helvetica", 10))
+        t.tag_configure("danger", foreground="#f44336", font=("Helvetica", 10))
+        t.tag_configure("info", foreground="#29b6f6", font=("Helvetica", 10))
         t.tag_configure("secondary", foreground="#adb5bd", font=("Helvetica", 10))
 
     def log(self, message, style="secondary"):
@@ -215,7 +241,7 @@ class PyMailApp(ttk.Window):
         self.log_area.text.configure(state="normal")
         self.log_area.text.insert(END, f"{message}\n", style)
         self.log_area.text.configure(state="disabled")
-        self.log_area.text.yview(END) # Auto-scroll
+        self.log_area.text.yview(END)  # Auto-scroll
 
     def run_flow(self, target_func):
         """Ejecuta una función de flujo en un hilo separado para no bloquear la UI."""
@@ -227,13 +253,21 @@ class PyMailApp(ttk.Window):
         if not id_curso:
             self.log("❌ [F1] El ID del curso no puede estar vacío.", "danger")
             return
-        
+
         try:
-            self.log(f"🚀 [F1] Iniciando flujo de bienvenida para el curso: {id_curso}", "success")
+            self.log(
+                f"🚀 [F1] Iniciando flujo de bienvenida para el curso: {id_curso}",
+                "success",
+            )
             self.mailing_service.enviar_bienvenida_curso(id_curso)
-            self.log(f"✅ [F1] Borrador generado para el curso {id_curso}. Revisa Outlook.", "success")
+            self.log(
+                f"✅ [F1] Borrador generado para el curso {id_curso}. Revisa Outlook.",
+                "success",
+            )
         except Exception:
-            logger.exception(f"Error en el flujo de bienvenida para el curso {id_curso}")
+            logger.exception(
+                f"Error en el flujo de bienvenida para el curso {id_curso}"
+            )
             self.log(f"🔥 [F1] Error crítico. Revisa app.log para detalles.", "danger")
 
     def f2_inicio_docentes(self):
@@ -243,11 +277,19 @@ class PyMailApp(ttk.Window):
             return
 
         try:
-            self.log(f"🚀 [F2] Iniciando flujo de inicio para docentes del curso: {id_curso}", "info")
+            self.log(
+                f"🚀 [F2] Iniciando flujo de inicio para docentes del curso: {id_curso}",
+                "info",
+            )
             self.mailing_service.enviar_inicio_docentes(id_curso)
-            self.log(f"✅ [F2] Borradores generados para el curso {id_curso}. Revisa Outlook.", "info")
+            self.log(
+                f"✅ [F2] Borradores generados para el curso {id_curso}. Revisa Outlook.",
+                "info",
+            )
         except Exception:
-            logger.exception(f"Error en el flujo de inicio para docentes del curso {id_curso}")
+            logger.exception(
+                f"Error en el flujo de inicio para docentes del curso {id_curso}"
+            )
             self.log(f"🔥 [F2] Error crítico. Revisa app.log para detalles.", "danger")
 
     def f3_informe_semanal(self):
@@ -256,7 +298,9 @@ class PyMailApp(ttk.Window):
             start_date = self.f3_start.get().strip()
             end_date = self.f3_end.get().strip()
             if not start_date or not end_date:
-                self.log("❌ [F3] Ingresa la fecha de inicio y fin (YYYY-MM-DD).", "danger")
+                self.log(
+                    "❌ [F3] Ingresa la fecha de inicio y fin (YYYY-MM-DD).", "danger"
+                )
                 return
             try:
                 s = datetime.strptime(start_date, "%Y-%m-%d")
@@ -265,19 +309,27 @@ class PyMailApp(ttk.Window):
                 self.log("❌ [F3] Formato de fecha inválido. Usa YYYY-MM-DD.", "danger")
                 return
             if s > e:
-                self.log("❌ [F3] La fecha de inicio debe ser anterior o igual a la fecha de fin.", "danger")
+                self.log(
+                    "❌ [F3] La fecha de inicio debe ser anterior o igual a la fecha de fin.",
+                    "danger",
+                )
                 return
         try:
             self.log("🚀 [F3] Iniciando flujo de informe semanal.", "warning")
             self.mailing_service.enviar_informe_semanal(start_date, end_date)
-            self.log("✅ [F3] Borrador de informe semanal generado. Revisa Outlook.", "warning")
+            self.log(
+                "✅ [F3] Borrador de informe semanal generado. Revisa Outlook.",
+                "warning",
+            )
         except Exception:
             self.log("🔥 [F3] Error crítico. Revisa app.log para detalles.", "danger")
+
 
 def main():
     """Punto de entrada para la aplicación gráfica."""
     app = PyMailApp()
     app.mainloop()
+
 
 if __name__ == "__main__":
     main()

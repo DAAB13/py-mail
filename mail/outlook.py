@@ -5,6 +5,7 @@ from loguru import logger
 from typing import Optional, List
 import pythoncom
 
+
 class OutlookMail:
     """Clase para enviar correos vía Outlook Classic con reconexión automática."""
 
@@ -24,13 +25,13 @@ class OutlookMail:
             self.app = None
 
     def enviar(
-        self, 
-        destinatario: str, 
-        asunto: str, 
-        cuerpo_html: str, 
+        self,
+        destinatario: str,
+        asunto: str,
+        cuerpo_html: str,
         adjuntos: Optional[List[str]] = None,
         cc: Optional[str] = None,
-        bcc: Optional[str] = None
+        bcc: Optional[str] = None,
     ):
         """Prepara, guarda en borradores y muestra un correo."""
         try:
@@ -56,9 +57,11 @@ class OutlookMail:
             mail.Save()
             # Lo mostramos en pantalla para revisión
             mail.Display()
-            
+
             logger.success(f"Borrador guardado y mostrado para: {destinatario}")
             return True
         except Exception:
-            logger.exception("Error crítico en la operación de Outlook (posible hilo o desconexión)")
+            logger.exception(
+                "Error crítico en la operación de Outlook (posible hilo o desconexión)"
+            )
             return False

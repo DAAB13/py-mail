@@ -49,6 +49,7 @@ class SesionProgramada:
     hora_fin: str
     total_horas: float
     soporte: Optional[str] = None # Movido al final para evitar el TypeError
+    id_sesion: Optional[str] = None # Agregado para compatibilidad con el parquet
 
     def get_resumen(self) -> str:
         """Un pequeño resumen para usar en correos o logs."""

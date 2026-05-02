@@ -18,7 +18,8 @@ subject = "Bienvenida al curso: {curso} - {id}"
 attachments = [
   "Cambio de contraseña - Estudiante.pdf", "Configuración_de_Microsoft_Authenticator_Estudiante.pdf",
   "GUIA CONTACTO UPN.pdf", "MANUAL PARA CONSULTAS A CONTACTO UPN.pdf",
-  "Reglamento de estudios de la escuela de posgrado y estudios continuos.pdf"
+  "Reglamento de estudios de la escuela de posgrado y estudios continuos.pdf",
+  "condiciones de servicio de enseñanza.pdf"
 ]
 attachments_path = "PATH_ADJUNTOS_ALUMNOS"
 type = "student_welcome"

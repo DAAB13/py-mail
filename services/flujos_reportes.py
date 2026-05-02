@@ -52,7 +52,8 @@ class FlujosReportes:
         # 3. Filtrar y Procesar: rango de fechas + soporte 'diego'
         sesiones_semana = []
         for s in todas_las_sesiones:
-            es_del_rango = inicio_iso <= str(s.fechas) <= fin_iso
+            fecha_str = str(s.fechas).split(" ")[0]  # Ignoramos la parte de la hora (00:00:00)
+            es_del_rango = inicio_iso <= fecha_str <= fin_iso
             es_diego = str(s.soporte or "").strip().upper() == "DIEGO"
             if es_del_rango and es_diego:
                 sesiones_semana.append(s.dict_plantilla)
