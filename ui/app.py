@@ -3,332 +3,474 @@ import sys
 import threading
 from datetime import datetime, timedelta
 from pathlib import Path
-from tkinter import BooleanVar
-import ttkbootstrap as ttk
+
+import flet as ft
 from loguru import logger
-from ttkbootstrap.constants import BOTH, E, END, HORIZONTAL, INFO, LEFT, RIGHT, SECONDARY, SUCCESS, W, X, YES
-from ttkbootstrap.scrolled import ScrolledText
-from PIL import Image, ImageTk
 
 # Añadimos el directorio raíz al path para que encuentre los módulos del proyecto
-# Esto es clave para que la app funcione al ejecutarla directamente
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from services.mailing import MailingService
 from config.logging_config import setup_logging
 
 
-class PyMailApp(ttk.Window):
-    def __init__(self):
-        # Configuración inicial de la ventana con el tema 'litera'
-        super().__init__(title="Py Mail", themename="darkly")
-        setup_logging()
-        self.geometry("800x720")
-        self.minsize(800, 680)
-        self.resizable(False, True)
+# ---------------------------------------------------------------------------
+# Paleta de colores por flujo (Material) y niveles de log
+# ---------------------------------------------------------------------------
+COLOR_F1 = ft.Colors.GREEN_400
+COLOR_F2 = ft.Colors.BLUE_400
+COLOR_F3 = ft.Colors.AMBER_400
 
-        # --- Animación del GIF ---
-        self.gif_frames = []
-        self.gif_delay = 100  # Delay por defecto
-        self.load_gif()
+LOG_COLORS = {
+    "success": "#4caf50",
+    "warning": "#ffc107",
+    "danger": "#f44336",
+    "info": "#29b6f6",
+    "secondary": "#adb5bd",
+}
+
+
+class PyMailApp:
+    """Interfaz moderna basada en Flet. Solo capa de presentación."""
+
+    def __init__(self, page: ft.Page):
+        self.page = page
+        setup_logging()
+
+        self._configure_window()
 
         try:
-            # Inicializamos el servicio de mailing, el corazón de la aplicación
             self.mailing_service = MailingService()
         except Exception as e:
-            # Si hay un error crítico al inicio (ej: no hay .env), lo mostramos
-            self.show_critical_error(f"No se pudo iniciar el servicio: {e}")
+            self._show_critical_error(f"No se pudo iniciar el servicio: {e}")
             return
 
-        self.create_widgets()
+        self._build_ui()
 
-    def show_critical_error(self, message):
-        """Muestra un error fatal que impide que la app funcione."""
-        error_label = ttk.Label(self, text=message, bootstyle="danger", wraplength=750)
-        error_label.pack(pady=20, padx=20)
+    # ---------------------------- Setup ----------------------------------
+    def _configure_window(self):
+        page = self.page
+        page.title = "Py Mail"
+        page.theme_mode = ft.ThemeMode.DARK
+        page.window.width = 920
+        page.window.height = 820
+        page.window.min_width = 820
+        page.window.min_height = 700
+        page.padding = 24
+        page.spacing = 0
+        page.theme = ft.Theme(color_scheme_seed=ft.Colors.GREEN)
+        page.bgcolor = "#0f1115"
 
-    def load_gif(self):
-        """Carga los frames de la animación GIF."""
-        try:
-            gif_path = Path(__file__).resolve().parent.parent / "assets/megaman.gif"
-            with Image.open(gif_path) as img:
-                self.gif_delay = img.info.get("duration", 100)
-                for i in range(img.n_frames):
-                    img.seek(i)
-                    # Creamos una copia para cada frame
-                    frame_image = img.copy()
-                    # Guardamos el PhotoImage para que no lo borre el recolector de basura
-                    self.gif_frames.append(ImageTk.PhotoImage(frame_image))
-        except FileNotFoundError:
-            self.gif_frames = []
-        except Exception:
-            self.gif_frames = []  # Si hay cualquier error, no mostramos animación
-
-    def update_gif_frame(self, frame_num):
-        """Actualiza el frame del GIF que se muestra en el Label."""
-        if not self.gif_frames:
-            return
-
-        frame = self.gif_frames[frame_num]
-        self.gif_label.configure(image=frame)
-
-        next_frame_num = (frame_num + 1) % len(self.gif_frames)
-        self.after(self.gif_delay, self.update_gif_frame, next_frame_num)
-
-    def create_widgets(self):
-        """Crea y organiza los widgets de la interfaz."""
-        main_frame = ttk.Frame(self, padding=20)
-        main_frame.pack(fill=BOTH, expand=YES)
-
-        # --- Cabecera con Título y GIF ---
-        header_frame = ttk.Frame(main_frame)
-        header_frame.pack(fill=X, pady=(0, 20))
-
-        header = ttk.Label(
-            header_frame,
-            text="Py Mail",
-            font=("Helvetica", 18, "bold"),
-            bootstyle=SUCCESS,
-        )
-        header.pack(side=LEFT, anchor=W)
-
-        if self.gif_frames:
-            self.gif_label = ttk.Label(header_frame)
-            self.gif_label.pack(side=RIGHT, anchor=E, padx=(0, 10))
-            self.after(0, self.update_gif_frame, 0)  # Inicia la animación
-
-        # --- Flujos ---
-        self.create_flow1_widgets(main_frame)
-        self.create_flow2_widgets(main_frame)
-        self.create_flow3_widgets(main_frame)
-
-        # Separador visual
-        ttk.Separator(main_frame, bootstyle=SECONDARY, orient=HORIZONTAL).pack(
-            pady=20, fill=X
+    def _show_critical_error(self, message: str):
+        self.page.add(
+            ft.Container(
+                content=ft.Text(message, color=ft.Colors.RED_400, size=16),
+                padding=20,
+            )
         )
 
-        # --- Área de Logs ---
-        log_header = ttk.Label(
-            main_frame, text="Registro de Actividad", font=("Helvetica", 12, "bold")
+    # ---------------------------- UI -------------------------------------
+    def _build_ui(self):
+        self.page.add(
+            ft.Column(
+                controls=[
+                    self._build_header(),
+                    ft.Container(height=12),
+                    self._build_flow1_card(),
+                    self._build_flow2_card(),
+                    self._build_flow3_card(),
+                    ft.Container(height=8),
+                    self._build_log_panel(),
+                ],
+                spacing=12,
+                expand=True,
+            )
         )
-        log_header.pack(pady=(0, 10))
 
-        self.log_area = ScrolledText(
-            main_frame, height=10, state="disabled", autohide=True
+    def _build_header(self) -> ft.Control:
+        title = ft.Column(
+            controls=[
+                ft.Text(
+                    "Py Mail",
+                    size=30,
+                    weight=ft.FontWeight.BOLD,
+                    color=ft.Colors.GREEN_300,
+                ),
+                ft.Text(
+                    "Automatización de correos académicos UPN",
+                    size=12,
+                    color=ft.Colors.with_opacity(0.6, ft.Colors.WHITE),
+                ),
+            ],
+            spacing=2,
         )
-        self.log_area.pack(fill=BOTH, expand=YES)
-        self._setup_log_tags()
 
-    def create_flow_frame(self, parent, title):
-        """Crea un marco estandarizado para cada flujo."""
-        frame = ttk.Labelframe(parent, text=title, padding=15)
-        frame.pack(fill=X, pady=10)
-        return frame
-
-    def create_flow1_widgets(self, parent):
-        """Widgets para el Flujo 1: Bienvenida a Alumnos."""
-        frame = self.create_flow_frame(parent, "F1: Bienvenida a Alumnos")
-
-        # Grid para alinear widgets
-        frame.grid_columnconfigure(1, weight=1)
-
-        label = ttk.Label(frame, text="ID del Curso:")
-        label.grid(row=0, column=0, padx=(0, 10), sticky="w")
-
-        self.f1_id_curso = ttk.Entry(frame, bootstyle=SUCCESS)
-        self.f1_id_curso.grid(row=0, column=1, padx=5, sticky="ew")
-
-        button = ttk.Button(
-            frame,
-            text="Generar Borrador",
-            bootstyle="success-outline",
-            command=lambda: self.run_flow(self.f1_bienvenida),
+        # GIF de Megaman (si está disponible en assets/)
+        gif = ft.Image(
+            src="megaman.gif",
+            width=72,
+            height=72,
+            fit=ft.BoxFit.CONTAIN,
+            error_content=ft.Container(width=0, height=0),
         )
-        button.grid(row=0, column=2, padx=(10, 0))
 
-    def create_flow2_widgets(self, parent):
-        """Widgets para el Flujo 2: Inicio para Docentes."""
-        frame = self.create_flow_frame(parent, "F2: Inicio para Docentes")
-        frame.grid_columnconfigure(1, weight=1)
-
-        label = ttk.Label(frame, text="ID del Curso:")
-        label.grid(row=0, column=0, padx=(0, 10), sticky="w")
-
-        self.f2_id_curso = ttk.Entry(frame, bootstyle=INFO)
-        self.f2_id_curso.grid(row=0, column=1, padx=5, sticky="ew")
-
-        button = ttk.Button(
-            frame,
-            text="Generar Borradores",
-            bootstyle="info-outline",
-            command=lambda: self.run_flow(self.f2_inicio_docentes),
+        return ft.Row(
+            controls=[title, ft.Container(expand=True), gif],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
-        button.grid(row=0, column=2, padx=(10, 0))
 
-    def create_flow3_widgets(self, parent):
-        """Widgets para el Flujo 3: Informe Semanal."""
-        frame = self.create_flow_frame(parent, "F3: Informe Semanal")
-        frame.grid_columnconfigure(1, weight=1)
-        frame.grid_columnconfigure(3, weight=1)
-
-        # Fila 0: toggle + botón
-        self.f3_semana_actual = BooleanVar(value=True)
-        ttk.Checkbutton(
-            frame,
-            text="Usar semana actual",
-            variable=self.f3_semana_actual,
-            bootstyle="warning-round-toggle",
-            command=self._toggle_f3_dates,
-        ).grid(row=0, column=0, columnspan=4, sticky="w", pady=(0, 10))
-
-        ttk.Button(
-            frame,
-            text="Generar Informe",
-            bootstyle="warning-outline",
-            command=lambda: self.run_flow(self.f3_informe_semanal),
-        ).grid(row=0, column=4, sticky="e", padx=(10, 0))
-
-        # Fila 1: campos de fecha
-        ttk.Label(frame, text="Inicio:").grid(row=1, column=0, padx=(0, 8), sticky="w")
-        self.f3_start = ttk.Entry(frame, bootstyle="warning")
-        self.f3_start.grid(row=1, column=1, padx=(0, 15), sticky="ew")
-
-        ttk.Label(frame, text="Fin:").grid(row=1, column=2, padx=(0, 8), sticky="w")
-        self.f3_end = ttk.Entry(frame, bootstyle="warning")
-        self.f3_end.grid(row=1, column=3, columnspan=2, sticky="ew")
-
-        # Fila 2: pista de formato (solo visible al editar manualmente)
-        self.f3_hint = ttk.Label(
-            frame,
-            text="Formato: YYYY-MM-DD  (ej. 2026-04-07 al 2026-04-13)",
-            bootstyle="secondary",
-            font=("Helvetica", 9),
+    def _make_card(self, title: str, color: str, icon, body: ft.Control) -> ft.Control:
+        return ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Row(
+                        controls=[
+                            ft.Icon(icon, color=color, size=20),
+                            ft.Text(
+                                title,
+                                size=14,
+                                weight=ft.FontWeight.BOLD,
+                                color=color,
+                            ),
+                        ],
+                        spacing=8,
+                    ),
+                    body,
+                ],
+                spacing=14,
+            ),
+            padding=ft.padding.symmetric(vertical=18, horizontal=20),
+            border=ft.border.all(1, ft.Colors.with_opacity(0.35, color)),
+            border_radius=10,
+            bgcolor=ft.Colors.with_opacity(0.04, color),
         )
-        self.f3_hint.grid(row=2, column=0, columnspan=5, sticky="w", pady=(5, 0))
 
-        self._toggle_f3_dates()
+    def _action_button(self, text: str, icon, color: str, on_click) -> ft.Control:
+        return ft.FilledTonalButton(
+            content=ft.Text(text, weight=ft.FontWeight.W_500),
+            icon=icon,
+            on_click=on_click,
+            style=ft.ButtonStyle(
+                color=color,
+                bgcolor=ft.Colors.with_opacity(0.12, color),
+                shape=ft.RoundedRectangleBorder(radius=8),
+                padding=ft.padding.symmetric(horizontal=18, vertical=14),
+            ),
+        )
 
-    def _toggle_f3_dates(self):
-        """Habilita/deshabilita los campos de fecha según el checkbox 'Semana actual'."""
-        if self.f3_semana_actual.get():
+    # ----- Flujo 1 -------------------------------------------------------
+    def _build_flow1_card(self) -> ft.Control:
+        self.f1_id_curso = ft.TextField(
+            label="ID del Curso",
+            hint_text="ej. 226201.1001",
+            border_color=ft.Colors.with_opacity(0.4, COLOR_F1),
+            focused_border_color=COLOR_F1,
+            cursor_color=COLOR_F1,
+            expand=True,
+            dense=True,
+        )
+        body = ft.Row(
+            controls=[
+                self.f1_id_curso,
+                self._action_button(
+                    "Generar Borrador",
+                    ft.Icons.SCHOOL_OUTLINED,
+                    COLOR_F1,
+                    lambda e: self._run_flow(self._f1_bienvenida),
+                ),
+            ],
+            spacing=12,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        return self._make_card(
+            "F1: Bienvenida a Alumnos", COLOR_F1, ft.Icons.MAIL_OUTLINE, body
+        )
+
+    # ----- Flujo 2 -------------------------------------------------------
+    def _build_flow2_card(self) -> ft.Control:
+        self.f2_id_curso = ft.TextField(
+            label="ID del Curso",
+            hint_text="ej. 226201.1001",
+            border_color=ft.Colors.with_opacity(0.4, COLOR_F2),
+            focused_border_color=COLOR_F2,
+            cursor_color=COLOR_F2,
+            expand=True,
+            dense=True,
+        )
+        body = ft.Row(
+            controls=[
+                self.f2_id_curso,
+                self._action_button(
+                    "Generar Borradores",
+                    ft.Icons.GROUPS_OUTLINED,
+                    COLOR_F2,
+                    lambda e: self._run_flow(self._f2_inicio_docentes),
+                ),
+            ],
+            spacing=12,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        return self._make_card(
+            "F2: Inicio para Docentes", COLOR_F2, ft.Icons.PERSON_OUTLINE, body
+        )
+
+    # ----- Flujo 3 -------------------------------------------------------
+    def _build_flow3_card(self) -> ft.Control:
+        hoy = datetime.now()
+        lunes = hoy - timedelta(days=hoy.weekday())
+        domingo = lunes + timedelta(days=6)
+
+        self.f3_semana_actual = ft.Switch(
+            label="Usar semana actual",
+            value=True,
+            active_color=COLOR_F3,
+            on_change=self._toggle_f3_dates,
+        )
+        self.f3_start = ft.TextField(
+            label="Inicio",
+            hint_text="YYYY-MM-DD",
+            value=lunes.strftime("%Y-%m-%d"),
+            read_only=True,
+            border_color=ft.Colors.with_opacity(0.4, COLOR_F3),
+            focused_border_color=COLOR_F3,
+            cursor_color=COLOR_F3,
+            expand=True,
+            dense=True,
+        )
+        self.f3_end = ft.TextField(
+            label="Fin",
+            hint_text="YYYY-MM-DD",
+            value=domingo.strftime("%Y-%m-%d"),
+            read_only=True,
+            border_color=ft.Colors.with_opacity(0.4, COLOR_F3),
+            focused_border_color=COLOR_F3,
+            cursor_color=COLOR_F3,
+            expand=True,
+            dense=True,
+        )
+        self.f3_hint = ft.Text(
+            "Formato: YYYY-MM-DD  (ej. 2026-04-07 al 2026-04-13)",
+            size=11,
+            color=ft.Colors.with_opacity(0.6, ft.Colors.WHITE),
+            visible=False,
+        )
+
+        body = ft.Column(
+            controls=[
+                ft.Row(
+                    controls=[
+                        self.f3_semana_actual,
+                        ft.Container(expand=True),
+                        self._action_button(
+                            "Generar Informe",
+                            ft.Icons.SUMMARIZE_OUTLINED,
+                            COLOR_F3,
+                            lambda e: self._run_flow(self._f3_informe_semanal),
+                        ),
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                ft.Row(controls=[self.f3_start, self.f3_end], spacing=12),
+                self.f3_hint,
+            ],
+            spacing=10,
+        )
+        return self._make_card(
+            "F3: Informe Semanal", COLOR_F3, ft.Icons.ASSESSMENT_OUTLINED, body
+        )
+
+    def _toggle_f3_dates(self, e=None):
+        if self.f3_semana_actual.value:
             hoy = datetime.now()
             lunes = hoy - timedelta(days=hoy.weekday())
             domingo = lunes + timedelta(days=6)
-            for entry, date in [(self.f3_start, lunes), (self.f3_end, domingo)]:
-                entry.configure(state="normal")
-                entry.delete(0, "end")
-                entry.insert(0, date.strftime("%Y-%m-%d"))
-                entry.configure(state="readonly")
-            self.f3_hint.grid_remove()
+            self.f3_start.value = lunes.strftime("%Y-%m-%d")
+            self.f3_end.value = domingo.strftime("%Y-%m-%d")
+            self.f3_start.read_only = True
+            self.f3_end.read_only = True
+            self.f3_hint.visible = False
         else:
-            self.f3_start.configure(state="normal")
-            self.f3_end.configure(state="normal")
-            self.f3_start.delete(0, "end")
-            self.f3_end.delete(0, "end")
-            self.f3_hint.grid()
+            self.f3_start.value = ""
+            self.f3_end.value = ""
+            self.f3_start.read_only = False
+            self.f3_end.read_only = False
+            self.f3_hint.visible = True
+        self.page.update()
 
-    def _setup_log_tags(self):
-        """Configura los colores de cada nivel de log en el área de texto."""
-        t = self.log_area.text
-        t.tag_configure("success", foreground="#4caf50", font=("Helvetica", 10))
-        t.tag_configure("warning", foreground="#ffc107", font=("Helvetica", 10))
-        t.tag_configure("danger", foreground="#f44336", font=("Helvetica", 10))
-        t.tag_configure("info", foreground="#29b6f6", font=("Helvetica", 10))
-        t.tag_configure("secondary", foreground="#adb5bd", font=("Helvetica", 10))
+    # ----- Panel de logs -------------------------------------------------
+    def _build_log_panel(self) -> ft.Control:
+        self.log_view = ft.ListView(
+            spacing=2,
+            padding=ft.padding.symmetric(vertical=8, horizontal=12),
+            auto_scroll=True,
+            expand=True,
+        )
 
-    def log(self, message, style="secondary"):
-        """Añade un mensaje al área de logs de forma segura para hilos."""
-        self.log_area.text.configure(state="normal")
-        self.log_area.text.insert(END, f"{message}\n", style)
-        self.log_area.text.configure(state="disabled")
-        self.log_area.text.yview(END)  # Auto-scroll
+        clear_btn = ft.IconButton(
+            icon=ft.Icons.DELETE_OUTLINE,
+            tooltip="Limpiar registro",
+            icon_color=ft.Colors.with_opacity(0.6, ft.Colors.WHITE),
+            on_click=self._clear_logs,
+        )
 
-    def run_flow(self, target_func):
-        """Ejecuta una función de flujo en un hilo separado para no bloquear la UI."""
-        thread = threading.Thread(target=target_func, daemon=True)
-        thread.start()
+        header = ft.Row(
+            controls=[
+                ft.Row(
+                    controls=[
+                        ft.Icon(
+                            ft.Icons.HISTORY,
+                            size=16,
+                            color=ft.Colors.with_opacity(0.7, ft.Colors.WHITE),
+                        ),
+                        ft.Text(
+                            "Registro de actividad",
+                            size=13,
+                            weight=ft.FontWeight.BOLD,
+                            color=ft.Colors.with_opacity(0.85, ft.Colors.WHITE),
+                        ),
+                    ],
+                    spacing=8,
+                ),
+                ft.Container(expand=True),
+                clear_btn,
+            ],
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
 
-    def f1_bienvenida(self):
-        id_curso = self.f1_id_curso.get().strip()
+        return ft.Container(
+            content=ft.Column(
+                controls=[
+                    header,
+                    ft.Container(
+                        content=self.log_view,
+                        bgcolor="#161922",
+                        border=ft.border.all(
+                            1, ft.Colors.with_opacity(0.08, ft.Colors.WHITE)
+                        ),
+                        border_radius=10,
+                        height=240,
+                    ),
+                ],
+                spacing=8,
+            ),
+        )
+
+    def _clear_logs(self, e=None):
+        self.log_view.controls.clear()
+        self.page.update()
+
+    # ---------------------------- Logging --------------------------------
+    def log(self, message: str, style: str = "secondary"):
+        """Añade un mensaje al panel de logs (seguro para hilos)."""
+        color = LOG_COLORS.get(style, LOG_COLORS["secondary"])
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.log_view.controls.append(
+            ft.Text(
+                f"[{timestamp}] {message}",
+                color=color,
+                size=12,
+                font_family="Consolas",
+                selectable=True,
+            )
+        )
+        try:
+            self.page.update()
+        except Exception:
+            pass
+
+    # ---------------------------- Flows ----------------------------------
+    def _run_flow(self, target):
+        """Ejecuta un flujo en un hilo separado para no bloquear la UI."""
+        threading.Thread(target=target, daemon=True).start()
+
+    def _f1_bienvenida(self):
+        id_curso = (self.f1_id_curso.value or "").strip()
         if not id_curso:
-            self.log("❌ [F1] El ID del curso no puede estar vacío.", "danger")
+            self.log("[F1] El ID del curso no puede estar vacío.", "danger")
             return
 
         try:
             self.log(
-                f"🚀 [F1] Iniciando flujo de bienvenida para el curso: {id_curso}",
+                f"[F1] Iniciando flujo de bienvenida para el curso: {id_curso}",
                 "success",
             )
             self.mailing_service.enviar_bienvenida_curso(id_curso)
             self.log(
-                f"✅ [F1] Borrador generado para el curso {id_curso}. Revisa Outlook.",
+                f"[F1] Borrador generado para el curso {id_curso}. Revisa Outlook.",
                 "success",
             )
         except Exception:
             logger.exception(
                 f"Error en el flujo de bienvenida para el curso {id_curso}"
             )
-            self.log(f"🔥 [F1] Error crítico. Revisa app.log para detalles.", "danger")
+            self.log("[F1] Error crítico. Revisa app.log para detalles.", "danger")
 
-    def f2_inicio_docentes(self):
-        id_curso = self.f2_id_curso.get().strip()
+    def _f2_inicio_docentes(self):
+        id_curso = (self.f2_id_curso.value or "").strip()
         if not id_curso:
-            self.log("❌ [F2] El ID del curso no puede estar vacío.", "danger")
+            self.log("[F2] El ID del curso no puede estar vacío.", "danger")
             return
 
         try:
             self.log(
-                f"🚀 [F2] Iniciando flujo de inicio para docentes del curso: {id_curso}",
+                f"[F2] Iniciando flujo de inicio para docentes del curso: {id_curso}",
                 "info",
             )
             self.mailing_service.enviar_inicio_docentes(id_curso)
             self.log(
-                f"✅ [F2] Borradores generados para el curso {id_curso}. Revisa Outlook.",
+                f"[F2] Borradores generados para el curso {id_curso}. Revisa Outlook.",
                 "info",
             )
         except Exception:
             logger.exception(
                 f"Error en el flujo de inicio para docentes del curso {id_curso}"
             )
-            self.log(f"🔥 [F2] Error crítico. Revisa app.log para detalles.", "danger")
+            self.log("[F2] Error crítico. Revisa app.log para detalles.", "danger")
 
-    def f3_informe_semanal(self):
+    def _f3_informe_semanal(self):
         start_date, end_date = None, None
-        if not self.f3_semana_actual.get():
-            start_date = self.f3_start.get().strip()
-            end_date = self.f3_end.get().strip()
+        if not self.f3_semana_actual.value:
+            start_date = (self.f3_start.value or "").strip()
+            end_date = (self.f3_end.value or "").strip()
             if not start_date or not end_date:
                 self.log(
-                    "❌ [F3] Ingresa la fecha de inicio y fin (YYYY-MM-DD).", "danger"
+                    "[F3] Ingresa la fecha de inicio y fin (YYYY-MM-DD).", "danger"
                 )
                 return
             try:
                 s = datetime.strptime(start_date, "%Y-%m-%d")
                 e = datetime.strptime(end_date, "%Y-%m-%d")
             except ValueError:
-                self.log("❌ [F3] Formato de fecha inválido. Usa YYYY-MM-DD.", "danger")
+                self.log("[F3] Formato de fecha inválido. Usa YYYY-MM-DD.", "danger")
                 return
             if s > e:
                 self.log(
-                    "❌ [F3] La fecha de inicio debe ser anterior o igual a la fecha de fin.",
+                    "[F3] La fecha de inicio debe ser anterior o igual a la fecha de fin.",
                     "danger",
                 )
                 return
+
         try:
-            self.log("🚀 [F3] Iniciando flujo de informe semanal.", "warning")
+            self.log("[F3] Iniciando flujo de informe semanal.", "warning")
             self.mailing_service.enviar_informe_semanal(start_date, end_date)
             self.log(
-                "✅ [F3] Borrador de informe semanal generado. Revisa Outlook.",
+                "[F3] Borrador de informe semanal generado. Revisa Outlook.",
                 "warning",
             )
         except Exception:
-            self.log("🔥 [F3] Error crítico. Revisa app.log para detalles.", "danger")
+            logger.exception("Error en el flujo de informe semanal")
+            self.log("[F3] Error crítico. Revisa app.log para detalles.", "danger")
 
 
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 def main():
-    """Punto de entrada para la aplicación gráfica."""
-    app = PyMailApp()
-    app.mainloop()
+    """Punto de entrada para la aplicación gráfica (Flet)."""
+    project_root = Path(__file__).resolve().parent.parent
+    assets_dir = project_root / "assets"
+    ft.app(target=PyMailApp, assets_dir=str(assets_dir))
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ Todos los correos se guardan como **borradores en Outlook** (nunca se envían au
 # Modo consola (menú interactivo)
 python main.py
 
-# Modo GUI (aplicación de escritorio con ttkbootstrap)
+# Modo GUI (aplicación de escritorio con Flet)
 python ui/app.py
 
 # Ejecutar tests
