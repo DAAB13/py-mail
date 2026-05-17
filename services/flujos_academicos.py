@@ -111,6 +111,58 @@ class FlujosAcademicos:
             f"Correo de bienvenida preparado para {len(estudiantes_curso)} alumnos con {len(adjuntos)} adjuntos."
         )
 
+    def enviar_bienvenida_curso_portugues(self, id_objetivo: str):
+        """[Flujo 1-PT] Genera un borrador de bienvenida para estudiantes de portugués
+        sin destinatarios y sin adjuntos (se completan manualmente en Outlook)."""
+        id_objetivo = id_objetivo.strip()
+        logger.info(f"Procesando Bienvenida Portugués para el ID: {id_objetivo}")
+
+        todas_las_sesiones = data_loader.load_programacion()
+        sesiones_id = [
+            s for s in todas_las_sesiones if str(s.id).strip() == id_objetivo
+        ]
+        if not sesiones_id:
+            logger.error(f"No se encontraron sesiones para el ID {id_objetivo}.")
+            return
+
+        sesion_principal = sesiones_id[0]
+        conf = self.core.get_template_config("bienvenida_alumnos_portugues")
+
+        try:
+            template = self.core.jinja_env.get_template(
+                "bienvenida_alumnos_portugues.html"
+            )
+            html_contenido = template.render(
+                curso=sesion_principal.curso,
+                periodo=sesion_principal.periodo,
+                nrc=sesion_principal.nrc,
+                docente=sesion_principal.docente,
+                **self.core.config.get("content_vars", {}),
+            )
+        except Exception:
+            logger.exception(
+                "Error crítico al renderizar la plantilla de bienvenida portugués"
+            )
+            return
+
+        subject_template = conf.get("subject", "Bienvenida al curso: {curso}")
+        try:
+            asunto = subject_template.format(
+                curso=sesion_principal.curso, id=id_objetivo, nrc=sesion_principal.nrc
+            )
+        except Exception:
+            logger.warning("Error al formatear el asunto dinámico. Usando fallback.")
+            asunto = f"Bienvenido al curso {sesion_principal.curso}"
+
+        self.core.outlook.enviar(
+            destinatario="diego.alvarado@upn.edu.pe",
+            asunto=asunto,
+            cuerpo_html=html_contenido,
+        )
+        logger.success(
+            f"Borrador de bienvenida portugués preparado para {sesion_principal.curso}."
+        )
+
     def enviar_inicio_docentes(self, id_objetivo: str):
         """[Flujo 2] Envía un correo por docente con sus sesiones específicas."""
         id_objetivo = id_objetivo.strip()

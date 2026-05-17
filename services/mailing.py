@@ -21,6 +21,9 @@ class MailingService:
     def enviar_bienvenida_curso(self, id_objetivo: str):
         self.flujos_academicos.enviar_bienvenida_curso(id_objetivo)
 
+    def enviar_bienvenida_curso_portugues(self, id_objetivo: str):
+        self.flujos_academicos.enviar_bienvenida_curso_portugues(id_objetivo)
+
     def enviar_inicio_docentes(self, id_objetivo: str):
         self.flujos_academicos.enviar_inicio_docentes(id_objetivo)
 

@@ -24,6 +24,11 @@ attachments = [
 attachments_path = "PATH_ADJUNTOS_ALUMNOS"
 type = "student_welcome"
 
+[templates.bienvenida_alumnos_portugues]
+subject = "Bienvenida al curso: {curso} - {id}"
+attachments = []
+type = "student_welcome_pt"
+
 [templates.inicio_docentes]
 subject = "Inicio de curso: {fecha_inicio} - {curso} - {id}"
 attachments = [

@@ -33,19 +33,19 @@
     }
     p {
       margin-bottom: 18px;
-      text-align: justify; 
+      text-align: justify;
     }
-    
-    /* --- TABLA DE INFO GENERAL MEJORADA --- */
+
+    /* --- TABLA DE INFO GENERAL --- */
     .data-table {
       width: 100%;
-      border-collapse: separate; /* Permite bordes redondeados perfectos */
+      border-collapse: separate;
       border-spacing: 0;
       margin: 25px auto;
       background-color: #ffffff;
       border-radius: 8px;
       border: 1px solid #e0e0e0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03); /* Sombra sutil para darle profundidad */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
       overflow: hidden;
     }
     .data-table td {
@@ -59,45 +59,10 @@
       font-weight: 600;
       color: #333333;
       width: 20%;
-      background-color: #fcfcfc; /* Gris extraclaro para diferenciar la columna */
-      border-right: 1px solid #f0f0f0; /* Línea separadora vertical */
+      background-color: #fcfcfc;
+      border-right: 1px solid #f0f0f0;
     }
-    /* -------------------------------------- */
 
-    .sessions-container {
-      margin: 25px 0;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #e7e7e7;
-    }
-    .sessions-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.95em;
-      text-align: center; 
-    }
-    .sessions-table th {
-      background-color: #000000; 
-      color: #ffffff;
-      padding: 14px 15px;
-      text-align: center;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 0.85em;
-    }
-    .sessions-table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e7e7e7;
-      color: #000000;
-    }
-    .sessions-table tr:last-child td {
-      border-bottom: none;
-    }
-    .sessions-table tr:nth-child(even) {
-      background-color: #f9f9f9; 
-    }
-    
     /* --- BOTÓN --- */
     .btn {
       display: inline-block;
@@ -109,7 +74,6 @@
       font-weight: bold;
       text-align: center;
     }
-    /* ------------- */
 
     ul {
       margin-top: 0;
@@ -162,11 +126,11 @@
         <table class="main" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td class="content">
-              
+
               <p>Estimado(a) estudiante, </p>
               <p>Reciba un cordial saludo a nombre de la Escuela de Posgrado y Estudios Continuos de la Universidad Privada del Norte (UPN).</p>
               <p>Con entusiasmo le damos la bienvenida al programa. A continuación, le compartimos información importante para el inicio de clases:</p>
-              
+
               <table class="data-table" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
                   <td class="label">🔹Curso:</td>
@@ -186,31 +150,9 @@
                 </tr>
               </table>
 
-              <p style="margin-bottom: 10px; text-align: left;">📅 <strong>Cronograma de sesiones:</strong></p>
-              <div class="sessions-container">
-                <table class="sessions-table">
-                  <thead>
-                    <tr>
-                      <th>Sesión</th>
-                      <th>Fecha</th>
-                      <th>Horario (Inicio - Fin)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for s in sesiones %}
-                    <tr>
-                      <td><strong>{{ s.sesion }}</strong></td>
-                      <td>{{ s.fecha }}</td>
-                      <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-
               <p style="text-align: center;">💻 <strong>Clases en vivo:</strong><br>
               El acceso será a través del Aula Virtual UPN:</p>
-              
+
               <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin: 20px auto;">
                 <tr>
                   <td align="center" bgcolor="#fca311" style="padding: 10px 24px; border-radius: 6px;">
@@ -223,7 +165,7 @@
 
               <p>En el presente correo adjuntamos lo siguiente:</p>
               <ul>
-                <li>Reglamento de estudios de la escuela de posgrado y estudios continuos</li>
+                <li>Carta de responsabilidades del estudiante 2026</li>
                 <li>Condiciones del servicio de enseñanza</li>
                 <li>Manual de cambio de contraseña</li>
                 <li>Manual de configuración de Microsoft Authenticator</li>
@@ -273,20 +215,6 @@
                     </ul>
                   </li>
                 </ul>
-              </div>
-
-              <hr class="divider">
-
-              <p style="text-align: left;">🙋 <strong>Soporte Académico y Administrativo:</strong></p>
-
-              <div class="contact-box">
-                <p style="margin-bottom: 10px; margin-top: 0; text-align: left;">• <strong>{{ coordinador_nombre }}</strong><br>
-                <span style="font-size: 0.9em;">{{ coordinador_cargo }}</span><br>
-                📧 <a href="mailto:{{ coordinador_email }}">{{ coordinador_email }}</a></p>
-                
-                <p style="margin-bottom: 0; margin-top: 15px; text-align: left;">• <strong>{{ asistente_nombre }}</strong><br>
-                <span style="font-size: 0.9em;">{{ asistente_cargo }}</span><br>
-                📧 <a href="mailto:{{ asistente_email }}">{{ asistente_email }}</a></p>
               </div>
 
               <p style="margin-top: 30px;">¡Le deseamos una excelente experiencia de aprendizaje!</p>

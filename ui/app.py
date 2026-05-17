@@ -18,6 +18,7 @@ from config.logging_config import setup_logging
 # Paleta de colores por flujo (Material) y niveles de log
 # ---------------------------------------------------------------------------
 COLOR_F1 = ft.Colors.GREEN_400
+COLOR_F1_PT = ft.Colors.TEAL_300
 COLOR_F2 = ft.Colors.BLUE_400
 COLOR_F3 = ft.Colors.AMBER_400
 
@@ -77,6 +78,7 @@ class PyMailApp:
                     self._build_header(),
                     ft.Container(height=12),
                     self._build_flow1_card(),
+                    self._build_flow1_pt_card(),
                     self._build_flow2_card(),
                     self._build_flow3_card(),
                     ft.Container(height=8),
@@ -185,6 +187,37 @@ class PyMailApp:
         )
         return self._make_card(
             "F1: Bienvenida a Alumnos", COLOR_F1, ft.Icons.MAIL_OUTLINE, body
+        )
+
+    # ----- Flujo 1-PT (Portugués) ----------------------------------------
+    def _build_flow1_pt_card(self) -> ft.Control:
+        self.f1_pt_id_curso = ft.TextField(
+            label="ID del Curso",
+            hint_text="ej. 226201.1001",
+            border_color=ft.Colors.with_opacity(0.4, COLOR_F1_PT),
+            focused_border_color=COLOR_F1_PT,
+            cursor_color=COLOR_F1_PT,
+            expand=True,
+            dense=True,
+        )
+        body = ft.Row(
+            controls=[
+                self.f1_pt_id_curso,
+                self._action_button(
+                    "Generar Borrador",
+                    ft.Icons.TRANSLATE_OUTLINED,
+                    COLOR_F1_PT,
+                    lambda e: self._run_flow(self._f1_pt_bienvenida),
+                ),
+            ],
+            spacing=12,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        return self._make_card(
+            "F1-PT: Bienvenida Portugués (sin destinatarios ni adjuntos)",
+            COLOR_F1_PT,
+            ft.Icons.LANGUAGE_OUTLINED,
+            body,
         )
 
     # ----- Flujo 2 -------------------------------------------------------
@@ -405,6 +438,28 @@ class PyMailApp:
                 f"Error en el flujo de bienvenida para el curso {id_curso}"
             )
             self.log("[F1] Error crítico. Revisa app.log para detalles.", "danger")
+
+    def _f1_pt_bienvenida(self):
+        id_curso = (self.f1_pt_id_curso.value or "").strip()
+        if not id_curso:
+            self.log("[F1-PT] El ID del curso no puede estar vacío.", "danger")
+            return
+
+        try:
+            self.log(
+                f"[F1-PT] Iniciando bienvenida portugués para el curso: {id_curso}",
+                "success",
+            )
+            self.mailing_service.enviar_bienvenida_curso_portugues(id_curso)
+            self.log(
+                f"[F1-PT] Borrador generado para el curso {id_curso}. Revisa Outlook.",
+                "success",
+            )
+        except Exception:
+            logger.exception(
+                f"Error en el flujo de bienvenida portugués para el curso {id_curso}"
+            )
+            self.log("[F1-PT] Error crítico. Revisa app.log para detalles.", "danger")
 
     def _f2_inicio_docentes(self):
         id_curso = (self.f2_id_curso.value or "").strip()
